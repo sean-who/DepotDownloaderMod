@@ -97,14 +97,15 @@ namespace DepotDownloader
 
                     foreach (var endpoint in weightedCdnServers)
                     {
-                        for (var i = 0; i < endpoint.Item1.NumEntries; i++) {
+                        for (var i = 0; i < endpoint.Item1.NumEntries; i++)
+                        {
                             availableServerEndpoints.Add(endpoint.Item1);
                         }
                     }
 
                     didPopulate = true;
-                } 
-                else if ( availableServerEndpoints.Count == 0 && !steamSession.steamClient.IsConnected && didPopulate )
+                }
+                else if (availableServerEndpoints.Count == 0 && !steamSession.steamClient.IsConnected && didPopulate)
                 {
                     ExhaustedToken?.Cancel();
                     return;
@@ -147,25 +148,33 @@ namespace DepotDownloader
 
                 try
                 {
-                    if (server.Type == "CDN" || server.Type == "SteamCache")
+                    if (DepotKeyStore.ContainsKey(depotId))
                     {
-                        steamSession.RequestCDNAuthToken(appId, depotId, server.Host);
-
-                        var cdnKey = string.Format("{0:D}:{1}", depotId, steamSession.ResolveCDNTopLevelHost(server.Host));
-                        SteamApps.CDNAuthTokenCallback authTokenCallback;
-
-                        if (steamSession.CDNAuthTokens.TryGetValue(cdnKey, out authTokenCallback))
+                        ((ConcurrentDictionary<uint, byte[]>)(typeof(CDNClient).GetField("depotKeys", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(client))).GetOrAdd(depotId, depotKey);
+                        await client.ConnectAsync(server).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        if (server.Type == "CDN" || server.Type == "SteamCache")
                         {
-                            cdnAuthToken = authTokenCallback.Token;
+                            steamSession.RequestCDNAuthToken(appId, depotId, server.Host);
+
+                            var cdnKey = string.Format("{0:D}:{1}", depotId, steamSession.ResolveCDNTopLevelHost(server.Host));
+                            SteamApps.CDNAuthTokenCallback authTokenCallback;
+
+                            if (steamSession.CDNAuthTokens.TryGetValue(cdnKey, out authTokenCallback))
+                            {
+                                cdnAuthToken = authTokenCallback.Token;
+                            }
+                            else
+                            {
+                                throw new Exception(String.Format("Failed to retrieve CDN token for server {0} depot {1}", server.Host, depotId));
+                            }
                         }
-                        else
-                        {
-                            throw new Exception(String.Format("Failed to retrieve CDN token for server {0} depot {1}", server.Host, depotId));
-                        }
+                        await client.ConnectAsync(server).ConfigureAwait(false);
+                        await client.AuthenticateDepotAsync(depotId, depotKey, cdnAuthToken).ConfigureAwait(false);
                     }
 
-                    await client.ConnectAsync(server).ConfigureAwait(false);
-                    await client.AuthenticateDepotAsync(depotId, depotKey, cdnAuthToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -193,24 +202,31 @@ namespace DepotDownloader
 
             try
             {
-                if (server.Type == "CDN" || server.Type == "SteamCache")
+                if (DepotKeyStore.ContainsKey(depotId))
                 {
-                    steamSession.RequestCDNAuthToken(appId, depotId, server.Host);
-
-                    var cdnKey = string.Format("{0:D}:{1}", depotId, steamSession.ResolveCDNTopLevelHost(server.Host));
-                    SteamApps.CDNAuthTokenCallback authTokenCallback;
-
-                    if (steamSession.CDNAuthTokens.TryGetValue(cdnKey, out authTokenCallback))
-                    {
-                        cdnAuthToken = authTokenCallback.Token;
-                    }
-                    else
-                    {
-                        throw new Exception(String.Format("Failed to retrieve CDN token for server {0} depot {1}", server.Host, depotId));
-                    }
+                    ((ConcurrentDictionary<uint, byte[]>)(typeof(CDNClient).GetField("depotKeys", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(client))).GetOrAdd(depotId, depotKey);
                 }
+                else
+                {
+                    if (server.Type == "CDN" || server.Type == "SteamCache")
+                    {
+                        steamSession.RequestCDNAuthToken(appId, depotId, server.Host);
 
-                await client.AuthenticateDepotAsync(depotId, depotKey, cdnAuthToken).ConfigureAwait(false);
+                        var cdnKey = string.Format("{0:D}:{1}", depotId, steamSession.ResolveCDNTopLevelHost(server.Host));
+                        SteamApps.CDNAuthTokenCallback authTokenCallback;
+
+                        if (steamSession.CDNAuthTokens.TryGetValue(cdnKey, out authTokenCallback))
+                        {
+                            cdnAuthToken = authTokenCallback.Token;
+                        }
+                        else
+                        {
+                            throw new Exception(String.Format("Failed to retrieve CDN token for server {0} depot {1}", server.Host, depotId));
+                        }
+                    }
+
+                    await client.AuthenticateDepotAsync(depotId, depotKey, cdnAuthToken).ConfigureAwait(false);
+                }
                 activeClientAuthed[client] = Tuple.Create(depotId, server);
                 return true;
             }
@@ -242,7 +258,7 @@ namespace DepotDownloader
                 if ((authData.Item2.Type == "CDN" || authData.Item2.Type == "SteamCache") && await ReauthConnectionAsync(client, authData.Item2, appId, depotId, depotKey).ConfigureAwait(false))
                 {
                     Console.WriteLine("Re-authed CDN connection to content server {0} from {1} to {2}", authData.Item2, authData.Item1, depotId);
-                }                
+                }
                 else if (authData.Item2.Type == "CS" && steamSession.AppTickets[depotId] == null && await ReauthConnectionAsync(client, authData.Item2, appId, depotId, depotKey).ConfigureAwait(false))
                 {
                     Console.WriteLine("Re-authed anonymous connection to content server {0} from {1} to {2}", authData.Item2, authData.Item1, depotId);
@@ -256,7 +272,7 @@ namespace DepotDownloader
 
             return client;
         }
-        
+
         public void ReturnConnection(CDNClient client)
         {
             if (client == null) return;

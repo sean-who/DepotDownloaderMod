@@ -29,7 +29,7 @@ namespace DepotDownloader
         private static Steam3Session.Credentials steam3Credentials;
         private static CDNClientPool cdnPool;
 
-        private const string DEFAULT_DOWNLOAD_DIR = "depots";
+        private static string DEFAULT_DOWNLOAD_DIR = "depots";
         private const string CONFIG_DIR = ".DepotDownloader";
         private static readonly string STAGING_DIR = Path.Combine( CONFIG_DIR, "staging" );
 
@@ -51,16 +51,25 @@ namespace DepotDownloader
             }
         }
 
-        static bool CreateDirectories( uint depotId, uint depotVersion, out string installDir )
+        static bool CreateDirectories( uint appId, string appName, uint depotId, uint depotVersion, string contentName, out string installDir )
         {
             installDir = null;
             try
             {
                 if ( string.IsNullOrWhiteSpace( ContentDownloader.Config.InstallDirectory ) )
                 {
+                    DEFAULT_DOWNLOAD_DIR = $"depots";
+
                     Directory.CreateDirectory( DEFAULT_DOWNLOAD_DIR );
 
-                    string depotPath = Path.Combine( DEFAULT_DOWNLOAD_DIR, depotId.ToString() );
+                    char[] arr = contentName.ToCharArray();
+
+                    arr = Array.FindAll<char>(arr, (c => (char.IsLetterOrDigit(c)
+                                                      || char.IsWhiteSpace(c)
+                                                      || c == '-')));
+                    string namevar = new string(arr).Trim();
+
+                    string depotPath = Path.Combine( DEFAULT_DOWNLOAD_DIR, $"{depotId} ({namevar})" );
                     Directory.CreateDirectory( depotPath );
 
                     installDir = Path.Combine( depotPath, depotVersion.ToString() );
@@ -409,7 +418,7 @@ namespace DepotDownloader
             if ( steam3 != null )
                 steam3.RequestAppInfo( appId );
 
-            if ( !AccountHasAccess( appId ) )
+            /*if ( !AccountHasAccess( appId ) )
             {
                 if ( steam3.RequestFreeAppLicense( appId ) )
                 {
@@ -420,7 +429,7 @@ namespace DepotDownloader
                     string contentName = GetAppOrDepotName( INVALID_DEPOT_ID, appId );
                     throw new ContentDownloaderException( String.Format( "App {0} ({1}) is not available from this account.", appId, contentName ) );
                 }
-            }
+            }*/
 
             var depotIDs = new List<uint>();
             KeyValue depots = GetSteam3AppSection( appId, EAppInfoSection.Depots );
@@ -504,13 +513,6 @@ namespace DepotDownloader
 
             string contentName = GetAppOrDepotName( depotId, appId );
 
-            if ( !AccountHasAccess( depotId ) )
-            {
-                Console.WriteLine( "Depot {0} ({1}) is not available from this account.", depotId, contentName );
-
-                return null;
-            }
-
             // Skip requesting an app ticket
             steam3.AppTickets[ depotId ] = null;
 
@@ -534,23 +536,41 @@ namespace DepotDownloader
             uint uVersion = GetSteam3AppBuildNumber( appId, branch );
 
             string installDir;
-            if ( !CreateDirectories( depotId, uVersion, out installDir ) )
+            if ( !CreateDirectories( appId, appName, depotId, uVersion, contentName, out installDir ) )
             {
                 Console.WriteLine( "Error: Unable to create install directories!" );
                 return null;
             }
 
-            steam3.RequestDepotKey( depotId, appId );
-            if ( !steam3.DepotKeys.ContainsKey( depotId ) )
+            if (!DepotKeyStore.ContainsKey(depotId) && !AccountHasAccess(depotId))
             {
-                Console.WriteLine( "No valid depot key for {0}, unable to download.", depotId );
+                Console.WriteLine("Depot {0} ({1}) is not available from this account and no key found in depot key store.", depotId, contentName);
+
                 return null;
             }
 
-            byte[] depotKey = steam3.DepotKeys[ depotId ];
+            byte[] depotKey;
+
+            if(DepotKeyStore.ContainsKey(depotId))
+            {
+                depotKey = DepotKeyStore.Get(depotId);
+            } else
+            {
+                steam3.RequestDepotKey(depotId, appId);
+                if (!steam3.DepotKeys.ContainsKey(depotId))
+                {
+                    Console.WriteLine("No valid depot key for {0}, unable to download.", depotId);
+                    return null;
+                }
+                depotKey = steam3.DepotKeys[depotId];
+            }
+
+            
 
             var info = new DepotDownloadInfo( depotId, manifestId, installDir, contentName );
             info.depotKey = depotKey;
+
+            File.WriteAllText($"depots\\{depotId}.key", BitConverter.ToString(depotKey).Replace("-", ""));
             return info;
         }
 
