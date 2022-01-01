@@ -3,6 +3,8 @@ DepotDownloaderMod
 
 Steam depot downloader utilizing the SteamKit2 library with depot keys support. Supports .NET 5.0
 
+Works with keys from: https://bbs.steamtools.net/forum.php?mod=viewthread&tid=11&extra=page%3D1 
+
 ### Downloading one or all depots for an app with depot keys
 ```
 dotnet DepotDownloader.dll -app <id> -depotkeys <depotkeysfile> [-depot <id> [-manifest <id>]] 
