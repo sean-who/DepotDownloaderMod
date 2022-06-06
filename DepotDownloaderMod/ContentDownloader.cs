@@ -672,7 +672,6 @@ namespace DepotDownloader
 
             var info = new DepotDownloadInfo(depotId, manifestId, installDir, contentName);
             info.depotKey = depotKey;
-            File.WriteAllText($"depots\\{depotId}.key", BitConverter.ToString(depotKey).Replace("-", ""));
             return info;
         }
 
