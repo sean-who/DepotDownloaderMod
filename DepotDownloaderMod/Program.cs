@@ -11,8 +11,17 @@ using SteamKit2;
 
 namespace DepotDownloader
 {
+
+    static class TokenCFG
+    {
+        public static bool useAppToken;
+        public static bool usePackageToken;
+        public static ulong appToken;
+        public static ulong packageToken;
+    }
     class Program
     {
+        
         static int Main(string[] args)
             => MainAsync(args).GetAwaiter().GetResult();
 
@@ -46,6 +55,13 @@ namespace DepotDownloader
 
             var username = GetParameter<string>(args, "-username") ?? GetParameter<string>(args, "-user");
             var password = GetParameter<string>(args, "-password") ?? GetParameter<string>(args, "-pass");
+
+            TokenCFG.useAppToken = HasParameter(args, "-apptoken");
+            TokenCFG.usePackageToken = HasParameter(args, "-packagetoken");
+            TokenCFG.appToken = Convert.ToUInt64(GetParameter<string>(args, "-apptoken"));
+            TokenCFG.packageToken = Convert.ToUInt64(GetParameter<string>(args, "-packagetoken"));
+
+
             ContentDownloader.Config.RememberPassword = HasParameter(args, "-remember-password");
 
             ContentDownloader.Config.DownloadManifestOnly = HasParameter(args, "-manifest-only");
@@ -93,6 +109,7 @@ namespace DepotDownloader
             }
 
             string depotKeysList = GetParameter<string>(args, "-depotkeys");
+
 
             if (depotKeysList != null)
             {
@@ -411,6 +428,8 @@ namespace DepotDownloader
             Console.WriteLine("\t-password <pass>\t\t- the password of the account to login to for restricted content.");
             Console.WriteLine("\t-remember-password\t\t- if set, remember the password for subsequent logins of this user. (Use -username <username> -remember-password as login credentials)");
             Console.WriteLine("\t-depotkeys <depotkeysfile>\t- a list of depot keys to use ('depotID;hexKey' per line)");
+            Console.WriteLine("\t-apptoken <apptoken>\t- Use Specified App Access Token");
+            Console.WriteLine("\t-packagetoken <packagetoken>\t- Use Specified Package Access Token");
             Console.WriteLine();
             Console.WriteLine("\t-dir <installdir>\t\t- the directory in which to place downloaded files.");
             Console.WriteLine("\t-filelist <file.txt>\t- a list of files to download (from the manifest). Prefix file path with 'regex:' if you want to match with regex.");

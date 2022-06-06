@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -175,24 +175,32 @@ namespace DepotDownloader
                 return;
 
             var completed = false;
-            Action<SteamApps.PICSTokensCallback> cbMethodTokens = appTokens =>
-            {
-                completed = true;
-                if (appTokens.AppTokensDenied.Contains(appId))
-                {
-                    Console.WriteLine("Insufficient privileges to get access token for app {0}", appId);
-                }
 
-                foreach (var token_dict in appTokens.AppTokens)
-                {
-                    this.AppTokens[token_dict.Key] = token_dict.Value;
-                }
-            };
-
-            WaitUntilCallback(() =>
+            if (TokenCFG.useAppToken)
             {
-                callbacks.Subscribe(steamApps.PICSGetAccessTokens(new List<uint> { appId }, new List<uint>()), cbMethodTokens);
-            }, () => { return completed; });
+                Console.WriteLine("Use App Token {0}", TokenCFG.appToken);
+            }
+            
+            if (!TokenCFG.useAppToken)
+            {
+                Action<SteamApps.PICSTokensCallback> cbMethodTokens = appTokens =>
+                {
+                    completed = true;
+                    if (appTokens.AppTokensDenied.Contains(appId))
+                    {
+                        Console.WriteLine("Insufficient privileges to get access token for app {0}", appId);
+                    }
+
+                    foreach (var token_dict in appTokens.AppTokens)
+                    {
+                        this.AppTokens[token_dict.Key] = token_dict.Value;
+                    }
+                };
+                WaitUntilCallback(() =>
+                {
+                    callbacks.Subscribe(steamApps.PICSGetAccessTokens(new List<uint> { appId }, new List<uint>()), cbMethodTokens);
+                }, () => { return completed; });
+            }
 
             completed = false;
             Action<SteamApps.PICSProductInfoCallback> cbMethod = appInfo =>
@@ -213,16 +221,28 @@ namespace DepotDownloader
                 }
             };
 
-            var request = new SteamApps.PICSRequest(appId);
-            if (AppTokens.ContainsKey(appId))
+            if (TokenCFG.useAppToken)
             {
-                request.AccessToken = AppTokens[appId];
+                var request = new SteamApps.PICSRequest(appId);
+                request.AccessToken = TokenCFG.appToken;
+                WaitUntilCallback(() =>
+                {
+                    callbacks.Subscribe(steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>()), cbMethod);
+                }, () => { return completed; });
             }
-
-            WaitUntilCallback(() =>
+            else
             {
-                callbacks.Subscribe(steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>()), cbMethod);
-            }, () => { return completed; });
+                var request = new SteamApps.PICSRequest(appId);
+                if (AppTokens.ContainsKey(appId))
+                {
+                    request.AccessToken = AppTokens[appId];
+                }
+
+                WaitUntilCallback(() =>
+                {
+                    callbacks.Subscribe(steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>()), cbMethod);
+                }, () => { return completed; });
+            }
         }
 
         public void RequestPackageInfo(IEnumerable<uint> packageIds)
@@ -256,9 +276,21 @@ namespace DepotDownloader
             {
                 var request = new SteamApps.PICSRequest(package);
 
-                if (PackageTokens.TryGetValue(package, out var token))
+                if (TokenCFG.usePackageToken)
                 {
-                    request.AccessToken = token;
+                    Console.WriteLine("Use App Token {0}", TokenCFG.packageToken);
+                }
+
+                if (TokenCFG.usePackageToken)
+                {
+                    request.AccessToken = TokenCFG.packageToken;
+                }
+                else
+                {
+                    if (PackageTokens.TryGetValue(package, out var token))
+                    {
+                        request.AccessToken = token;
+                    }
                 }
 
                 packageRequests.Add(request);
