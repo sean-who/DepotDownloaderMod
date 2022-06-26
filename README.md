@@ -1,5 +1,6 @@
 DepotDownloaderMod
 ===============
+IMPROTANT: This Tool Doesn't work anymore Due to GetManifestRequestCode Verification.
 
 Steam depot downloader utilizing the SteamKit2 library with depot keys support. Supports .NET 5.0 
 

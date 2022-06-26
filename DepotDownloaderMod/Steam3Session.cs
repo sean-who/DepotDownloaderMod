@@ -40,6 +40,7 @@ namespace DepotDownloader
 
         public SteamClient steamClient;
         public SteamUser steamUser;
+        public SteamContent steamContent;
         readonly SteamApps steamApps;
         readonly SteamCloud steamCloud;
         readonly SteamUnifiedMessages.UnifiedService<IPublishedFile> steamPublishedFile;
@@ -101,7 +102,7 @@ namespace DepotDownloader
             this.steamCloud = this.steamClient.GetHandler<SteamCloud>();
             var steamUnifiedMessages = this.steamClient.GetHandler<SteamUnifiedMessages>();
             this.steamPublishedFile = steamUnifiedMessages.CreateService<IPublishedFile>();
-
+            this.steamContent = this.steamClient.GetHandler<SteamContent>();
             this.callbacks = new CallbackManager(this.steamClient);
 
             this.callbacks.Subscribe<SteamClient.ConnectedCallback>(ConnectedCallback);
@@ -347,50 +348,18 @@ namespace DepotDownloader
             }, () => { return completed; });
         }
 
-        public string ResolveCDNTopLevelHost(string host)
+
+        public async Task<ulong> GetDepotManifestRequestCodeAsync(uint depotId, uint appId, ulong manifestId, string branch)
         {
-            // SteamPipe CDN shares tokens with all hosts
-            if (host.EndsWith(".steampipe.steamcontent.com"))
-            {
-                return "steampipe.steamcontent.com";
-            }
+            if (bAborted)
+                return 0;
 
-            if (host.EndsWith(".steamcontent.com"))
-            {
-                return "steamcontent.com";
-            }
+            var requestCode = await steamContent.GetManifestRequestCode(depotId, appId, manifestId, branch);
+            Console.WriteLine("Got manifest request code for {0} {1} result: {2}",
+                depotId, manifestId,
+                requestCode);
 
-            return host;
-        }
-
-        public void RequestCDNAuthToken(uint appid, uint depotid, string host, string cdnKey)
-        {
-            if (CDNAuthTokens.ContainsKey(cdnKey) || bAborted)
-                return;
-
-            if (!CDNAuthTokens.TryAdd(cdnKey, new TaskCompletionSource<SteamApps.CDNAuthTokenCallback>()))
-                return;
-
-            var completed = false;
-            var timeoutDate = DateTime.Now.AddSeconds(10);
-            Action<SteamApps.CDNAuthTokenCallback> cbMethod = cdnAuth =>
-            {
-                completed = true;
-                Console.WriteLine("Got CDN auth token for {0} result: {1} (expires {2})", host, cdnAuth.Result, cdnAuth.Expiration);
-
-                if (cdnAuth.Result != EResult.OK)
-                {
-                    Abort();
-                    return;
-                }
-
-                CDNAuthTokens[cdnKey].TrySetResult(cdnAuth);
-            };
-
-            WaitUntilCallback(() =>
-            {
-                callbacks.Subscribe(steamApps.GetCDNAuthToken(appid, depotid, host), cbMethod);
-            }, () => { return completed || DateTime.Now >= timeoutDate; });
+            return requestCode;
         }
 
         public void CheckAppBetaPassword(uint appid, string password)
@@ -628,8 +597,11 @@ namespace DepotDownloader
 
                 if (is2FA)
                 {
-                    Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
-                    logonDetails.TwoFactorCode = Console.ReadLine();
+                    do
+                    {
+                        Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
+                        logonDetails.TwoFactorCode = Console.ReadLine();
+                    } while (String.Empty == logonDetails.TwoFactorCode);
                 }
                 else if (isLoginKey)
                 {
@@ -651,8 +623,11 @@ namespace DepotDownloader
                 }
                 else
                 {
-                    Console.Write("Please enter the authentication code sent to your email address: ");
-                    logonDetails.AuthCode = Console.ReadLine();
+                    do
+                    {
+                        Console.Write("Please enter the authentication code sent to your email address: ");
+                        logonDetails.AuthCode = Console.ReadLine();
+                    } while (string.Empty == logonDetails.AuthCode);
                 }
 
                 Console.Write("Retrying Steam3 connection...");
