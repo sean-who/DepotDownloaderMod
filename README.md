@@ -1,6 +1,6 @@
 DepotDownloaderMod
 ===============
-IMPROTANT: This Tool Doesn't work anymore Due to GetManifestRequestCode Verification.
+IMPROTANT: The depot key function doesn't work anymore Due to GetManifestRequestCode Verification. 
 
 Steam depot downloader utilizing the SteamKit2 library with depot keys support. Supports .NET 5.0 
 
@@ -53,6 +53,7 @@ Parameter | Description
 -depotkeys <depotkeysfile>  | a list of depot keys to use ('depotID;hexKey' per line)
 -apptoken <apptoken>        | Use Specified App Access Token
 -packagetoken <packagetoken>| Use Specified Package Access Token
+-machineauth <ssfnpath>     | Use Specified ssfn Machine Auth File
 -dir \<installdir>		    | the directory in which to place downloaded files.
 -filelist \<file.txt>	    | a list of files to download (from the manifest). Prefix file path with `regex:` if you want to match with regex.
 -validate				    | Include checksum verification of files already downloaded
