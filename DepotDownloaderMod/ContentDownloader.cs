@@ -362,7 +362,27 @@ namespace DepotDownloader
                 _ = AccountSettingsStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
             }
 
-            steam3 = new Steam3Session(
+
+            if (TokenCFG.useMachineAuth)
+            {
+                var sentryFileHash = CryptoHelper.SHAHash(File.ReadAllBytes(TokenCFG.MachineAuth));
+                var machineAuthFileName = Path.GetFileName(TokenCFG.MachineAuth);
+                Console.WriteLine("Using Machine Auth: {0}", machineAuthFileName);
+                steam3 = new Steam3Session(
+                new SteamUser.LogOnDetails
+                {
+                    SentryFileHash = sentryFileHash,
+                    Username = username,
+                    Password = loginKey == null ? password : null,
+                    ShouldRememberPassword = Config.RememberPassword,
+                    LoginKey = loginKey,
+                    LoginID = Config.LoginID ?? 0x534B32, // "SK2"
+                }
+                );
+            }
+            else
+            {
+                steam3 = new Steam3Session(
                 new SteamUser.LogOnDetails
                 {
                     Username = username,
@@ -371,7 +391,11 @@ namespace DepotDownloader
                     LoginKey = loginKey,
                     LoginID = Config.LoginID ?? 0x534B32, // "SK2"
                 }
-            );
+                );
+            }
+            
+
+
 
             steam3Credentials = steam3.WaitForCredentials();
 

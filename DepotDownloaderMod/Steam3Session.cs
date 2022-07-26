@@ -581,15 +581,13 @@ namespace DepotDownloader
 
         private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
         {
+
             var isSteamGuard = loggedOn.Result == EResult.AccountLogonDenied;
             var is2FA = loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor;
             var isLoginKey = ContentDownloader.Config.RememberPassword && logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
 
             if (isSteamGuard || is2FA || isLoginKey)
             {
-                bExpectingDisconnectRemote = true;
-                Abort(false);
-
                 if (!isLoginKey)
                 {
                     Console.WriteLine("This account is protected by Steam Guard.");
@@ -597,11 +595,7 @@ namespace DepotDownloader
 
                 if (is2FA)
                 {
-                    do
-                    {
-                        Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
-                        logonDetails.TwoFactorCode = Console.ReadLine();
-                    } while (String.Empty == logonDetails.TwoFactorCode);
+                    Console.WriteLine("2FA needed.");
                 }
                 else if (isLoginKey)
                 {
@@ -623,11 +617,7 @@ namespace DepotDownloader
                 }
                 else
                 {
-                    do
-                    {
-                        Console.Write("Please enter the authentication code sent to your email address: ");
-                        logonDetails.AuthCode = Console.ReadLine();
-                    } while (string.Empty == logonDetails.AuthCode);
+                    Console.WriteLine("Auth Code needed.");
                 }
 
                 Console.Write("Retrying Steam3 connection...");
@@ -635,7 +625,6 @@ namespace DepotDownloader
 
                 return;
             }
-
             if (loggedOn.Result == EResult.TryAnotherCM)
             {
                 Console.Write("Retrying Steam3 connection (TryAnotherCM)...");
@@ -675,8 +664,12 @@ namespace DepotDownloader
 
         private void SessionTokenCallback(SteamUser.SessionTokenCallback sessionToken)
         {
+
             Console.WriteLine("Got session token!");
             credentials.SessionToken = sessionToken.SessionToken;
+
+
+
         }
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
@@ -703,6 +696,8 @@ namespace DepotDownloader
 
         private void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback machineAuth)
         {
+
+
             var hash = Util.SHAHash(machineAuth.Data);
             Console.WriteLine("Got Machine Auth: {0} {1} {2} {3}", machineAuth.FileName, machineAuth.Offset, machineAuth.BytesToWrite, machineAuth.Data.Length, hash);
 

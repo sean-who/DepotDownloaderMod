@@ -16,12 +16,14 @@ namespace DepotDownloader
     {
         public static bool useAppToken;
         public static bool usePackageToken;
+        public static bool useMachineAuth;
         public static ulong appToken;
         public static ulong packageToken;
+        public static string MachineAuth;
     }
     class Program
     {
-        
+
         static int Main(string[] args)
             => MainAsync(args).GetAwaiter().GetResult();
 
@@ -60,6 +62,9 @@ namespace DepotDownloader
             TokenCFG.usePackageToken = HasParameter(args, "-packagetoken");
             TokenCFG.appToken = Convert.ToUInt64(GetParameter<string>(args, "-apptoken"));
             TokenCFG.packageToken = Convert.ToUInt64(GetParameter<string>(args, "-packagetoken"));
+            TokenCFG.useMachineAuth = HasParameter(args, "-machineauth");
+            TokenCFG.MachineAuth = GetParameter<string>(args, "-machineauth");
+            TokenCFG.MachineAuth = GetParameter<string>(args, "-machineauth");
 
 
             ContentDownloader.Config.RememberPassword = HasParameter(args, "-remember-password");
@@ -430,6 +435,7 @@ namespace DepotDownloader
             Console.WriteLine("\t-depotkeys <depotkeysfile>\t- a list of depot keys to use ('depotID;hexKey' per line)");
             Console.WriteLine("\t-apptoken <apptoken>\t- Use Specified App Access Token");
             Console.WriteLine("\t-packagetoken <packagetoken>\t- Use Specified Package Access Token");
+            Console.WriteLine("\t-machineauth <ssfnpath>\t- Use Specified ssfn Machine Auth File");
             Console.WriteLine();
             Console.WriteLine("\t-dir <installdir>\t\t- the directory in which to place downloaded files.");
             Console.WriteLine("\t-filelist <file.txt>\t- a list of files to download (from the manifest). Prefix file path with 'regex:' if you want to match with regex.");
