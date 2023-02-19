@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using ProtoBuf;
 using SteamKit2;
+using static SteamKit2.Internal.CMsgClientUGSGetGlobalStatsResponse;
 
 namespace DepotDownloader
 {
@@ -121,7 +122,8 @@ namespace DepotDownloader
         [ProtoMember(3)]
         public DateTime CreationTime { get; private set; }
 
-        public static ProtoManifest LoadFromFile(string filename, out byte[] checksum)
+
+        public static ProtoManifest LoadFromFile(string filename, out byte[] checksum,bool fromdepotdownloader = true)
         {
             if (!File.Exists(filename))
             {
@@ -132,15 +134,31 @@ namespace DepotDownloader
             using (var ms = new MemoryStream())
             {
                 using (var fs = File.Open(filename, FileMode.Open))
-                using (var ds = new DeflateStream(fs, CompressionMode.Decompress))
-                    ds.CopyTo(ms);
 
+                    if (fromdepotdownloader)
+                    {
+                        using (var ds = new DeflateStream(fs, CompressionMode.Decompress))
+                            ds.CopyTo(ms);
+
+                    }
+                    else
+                    {
+                        fs.CopyTo(ms);
+                    }
                 checksum = Util.SHAHash(ms.ToArray());
 
                 ms.Seek(0, SeekOrigin.Begin);
-                return Serializer.Deserialize<ProtoManifest>(ms);
+                if (fromdepotdownloader)
+                {
+                    return Serializer.Deserialize<ProtoManifest>(ms);
+                }
+                else
+                {
+                    return new ProtoManifest(DepotManifest.Deserialize(ms.ToArray()),0);
+                }
             }
         }
+
 
         public void SaveToFile(string filename, out byte[] checksum)
         {

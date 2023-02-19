@@ -1,30 +1,36 @@
 DepotDownloaderMod
 ===============
-IMPROTANT: The depot key function doesn't work anymore Due to GetManifestRequestCode Verification. 
+IMPROTANT: This Tool require a manifest file to work Due to GetManifestRequestCode Verification.
 
-Steam depot downloader utilizing the SteamKit2 library with depot keys support. Supports .NET 5.0 
+Steam depot downloader utilizing the SteamKit2 library with depot keys support and many other features. Supports .NET 6.0  
 
-Works with keys from SteamTools: 
-https://bbs.steamtools.net/forum.php?mod=viewthread&tid=44&highlight=%E5%A4%A7%E5%AE%B6 
-https://bbs.steamtools.net/forum.php?mod=viewthread&tid=16&highlight=%E5%A4%A7%E5%AE%B6 
+Works with keys from SteamTools:  
 
+https://bbs.steamtools.net/forum.php?mod=viewthread&tid=44&highlight=%E5%A4%A7%E5%AE%B6  
+https://bbs.steamtools.net/forum.php?mod=viewthread&tid=16&highlight=%E5%A4%A7%E5%AE%B6  
 
-### Downloading one or all depots for an app with depot keys and app access token
+Update:  
+Added Scripts\storage_depotdownloadermod.py to generate a bat file to download with depot keys and manifests from <https://github.com/wxy1343/ManifestAutoUpdate/>
+
+### Downloading one or all depots for an app with depot keys and manifest file
+
+```(text)
+dotnet DepotDownloader.dll -app <id> -depotkeys <depotkeysfile> [-depot <id> [-manifest <id>]] -manifestfile <manifestfile>
 ```
-dotnet DepotDownloader.dll -app <id> -depotkeys <depotkeysfile> [-depot <id> [-manifest <id>]] 
-```
 
-For example: `dotnet DepotDownloader.dll -app 730 -depot 731 -manifest 7617088375292372759 -depotkeys steam.keys -apptoken 1234567890123456789`
+For example: `dotnet DepotDownloader.dll -app 730 -depot 731 -manifest 7617088375292372759 -depotkeys steam.keys -apptoken 1234567890123456789 -manifestfile 730_7617088375292372759.manifest`
 
 ### Downloading a workshop item using pubfile id
-```
+
+```(text)
 dotnet DepotDownloader.dll -app <id> -pubfile <id> [-username <username> [-password <password>]]
 ```
 
 For example: `dotnet DepotDownloader.dll -app 730 -pubfile 1885082371`
 
 ### Downloading a workshop item using ugc id
-```
+
+```(text)
 dotnet DepotDownloader.dll -app <id> -ugc <id> [-username <username> [-password <password>]]
 ```
 
@@ -49,13 +55,13 @@ Parameter | Description
 -pubfile \<#>			    | the PublishedFileId to download. (Will automatically resolve to UGC id)
 -username \<user>		    | the username of the account to login to for restricted content.
 -password \<pass>		    | the password of the account to login to for restricted content.
--remember-password		    | if set, remember the password for subsequent logins of this user. (Use -username \<username> -remember-password as login credentials)
--depotkeys \<depotkeysfile> | a list of depot keys to use ('depotID;hexKey' per line)
--apptoken \<apptoken>       | Use Specified App Access Token
--packagetoken \<packagetoken>| Use Specified Package Access Token
--machineauth \<ssfnpath>    | Use Specified ssfn Machine Auth File
--dir \<installdir>          | the directory in which to place downloaded files.
--filelist \<file.txt>       | a list of files to download (from the manifest). Prefix file path with `regex:` if you want to match with regex.
+-remember-password		    | if set, remember the password for subsequent logins of this user. (Use -username <username> -remember-password as login credentials)
+-depotkeys <depotkeysfile>  | a list of depot keys to use ('depotID;hexKey' per line)
+-manifestfile <manifestfile>| Use Specified Manifest file from Steam.
+-apptoken <apptoken>        | Use Specified App Access Token
+-packagetoken <packagetoken>| Use Specified Package Access Token
+-dir \<installdir>		    | the directory in which to place downloaded files.
+-filelist \<file.txt>	    | a list of files to download (from the manifest). Prefix file path with `regex:` if you want to match with regex.
 -validate				    | Include checksum verification of files already downloaded
 -manifest-only			    | downloads a human readable manifest for any depots that would be downloaded.
 -cellid \<#>			    | the overridden CellID of the content server to download from.

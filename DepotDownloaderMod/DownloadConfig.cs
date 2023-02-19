@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace DepotDownloader
@@ -27,5 +27,8 @@ namespace DepotDownloader
 
         // A Steam LoginID to allow multiple concurrent connections
         public uint? LoginID { get; set; }
+
+        public bool UseManifestFile { get; set; }
+        public string ManifestFile { get; set; }
     }
 }

@@ -141,6 +141,8 @@ namespace DepotDownloader
             ContentDownloader.Config.MaxDownloads = GetParameter(args, "-max-downloads", 8);
             ContentDownloader.Config.MaxServers = Math.Max(ContentDownloader.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
             ContentDownloader.Config.LoginID = HasParameter(args, "-loginid") ? GetParameter<uint>(args, "-loginid") : null;
+            ContentDownloader.Config.UseManifestFile = HasParameter(args, "-manifestfile");
+            ContentDownloader.Config.ManifestFile = GetParameter<string>(args, "-manifestfile");
 
             #endregion
 
@@ -433,6 +435,7 @@ namespace DepotDownloader
             Console.WriteLine("\t-password <pass>\t\t- the password of the account to login to for restricted content.");
             Console.WriteLine("\t-remember-password\t\t- if set, remember the password for subsequent logins of this user. (Use -username <username> -remember-password as login credentials)");
             Console.WriteLine("\t-depotkeys <depotkeysfile>\t- a list of depot keys to use ('depotID;hexKey' per line)");
+            Console.WriteLine("\t-manifestfile <manifestfile>\t- Use Specified Manifest file from Steam.");
             Console.WriteLine("\t-apptoken <apptoken>\t- Use Specified App Access Token");
             Console.WriteLine("\t-packagetoken <packagetoken>\t- Use Specified Package Access Token");
             Console.WriteLine("\t-machineauth <ssfnpath>\t- Use Specified ssfn Machine Auth File");

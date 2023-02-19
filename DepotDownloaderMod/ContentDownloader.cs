@@ -819,64 +819,27 @@ namespace DepotDownloader
             DepotConfigStore.Instance.InstalledManifestIDs[depot.id] = INVALID_MANIFEST_ID;
             DepotConfigStore.Save();
 
-            if (lastManifestId != INVALID_MANIFEST_ID)
+            var oldManifestFileName = Path.Combine(configDir, string.Format("{0}_{1}.manifest", depot.id, lastManifestId));
+            if (Config.UseManifestFile)
             {
-                var oldManifestFileName = Path.Combine(configDir, string.Format("{0}_{1}.bin", depot.id, lastManifestId));
-
-                if (File.Exists(oldManifestFileName))
-                {
-                    byte[] expectedChecksum, currentChecksum;
-
-                    try
-                    {
-                        expectedChecksum = File.ReadAllBytes(oldManifestFileName + ".sha");
-                    }
-                    catch (IOException)
-                    {
-                        expectedChecksum = null;
-                    }
-
-                    oldProtoManifest = ProtoManifest.LoadFromFile(oldManifestFileName, out currentChecksum);
-
-                    if (expectedChecksum == null || !expectedChecksum.SequenceEqual(currentChecksum))
-                    {
-                        // We only have to show this warning if the old manifest ID was different
-                        if (lastManifestId != depot.manifestId)
-                            Console.WriteLine("Manifest {0} on disk did not match the expected checksum.", lastManifestId);
-                        oldProtoManifest = null;
-                    }
-                }
+                newProtoManifest = ProtoManifest.LoadFromFile(Config.ManifestFile, out _, false);
             }
+            else
+            {
+                oldProtoManifest = ProtoManifest.LoadFromFile(oldManifestFileName, out _);
+            }
+            
 
             if (lastManifestId == depot.manifestId && oldProtoManifest != null)
             {
                 newProtoManifest = oldProtoManifest;
                 Console.WriteLine("Already have manifest {0} for depot {1}.", depot.manifestId, depot.id);
             }
+
             else
             {
-                var newManifestFileName = Path.Combine(configDir, string.Format("{0}_{1}.bin", depot.id, depot.manifestId));
-                if (newManifestFileName != null)
-                {
-                    byte[] expectedChecksum, currentChecksum;
+                var newManifestFileName = Path.Combine(configDir, string.Format("{0}_{1}.manifest", depot.id, depot.manifestId));
 
-                    try
-                    {
-                        expectedChecksum = File.ReadAllBytes(newManifestFileName + ".sha");
-                    }
-                    catch (IOException)
-                    {
-                        expectedChecksum = null;
-                    }
-
-                    newProtoManifest = ProtoManifest.LoadFromFile(newManifestFileName, out currentChecksum);
-
-                    if (newProtoManifest != null && (expectedChecksum == null || !expectedChecksum.SequenceEqual(currentChecksum)))
-                    {
-                        Console.WriteLine("Manifest {0} on disk did not match the expected checksum.", depot.manifestId);
-                        newProtoManifest = null;
-                    }
-                }
 
                 if (newProtoManifest != null)
                 {
@@ -888,7 +851,7 @@ namespace DepotDownloader
 
                     DepotManifest depotManifest = null;
                     ulong manifestRequestCode = 0;
-                    var manifestRequestCodeExpiration = DateTime.MinValue;  
+                    var manifestRequestCodeExpiration = DateTime.MinValue;
 
                     do
                     {
