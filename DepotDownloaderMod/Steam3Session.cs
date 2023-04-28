@@ -581,13 +581,15 @@ namespace DepotDownloader
 
         private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
         {
-
             var isSteamGuard = loggedOn.Result == EResult.AccountLogonDenied;
             var is2FA = loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor;
             var isLoginKey = ContentDownloader.Config.RememberPassword && logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
 
             if (isSteamGuard || is2FA || isLoginKey)
             {
+                bExpectingDisconnectRemote = true;
+                Abort(false);
+
                 if (!isLoginKey)
                 {
                     Console.WriteLine("This account is protected by Steam Guard.");
@@ -595,7 +597,11 @@ namespace DepotDownloader
 
                 if (is2FA)
                 {
-                    Console.WriteLine("2FA needed.");
+                    do
+                    {
+                        Console.Write("Please enter your 2 factor auth code from your authenticator app: ");
+                        logonDetails.TwoFactorCode = Console.ReadLine();
+                    } while (String.Empty == logonDetails.TwoFactorCode);
                 }
                 else if (isLoginKey)
                 {
@@ -617,7 +623,11 @@ namespace DepotDownloader
                 }
                 else
                 {
-                    Console.WriteLine("Auth Code needed.");
+                    do
+                    {
+                        Console.Write("Please enter the authentication code sent to your email address: ");
+                        logonDetails.AuthCode = Console.ReadLine();
+                    } while (string.Empty == logonDetails.AuthCode);
                 }
 
                 Console.Write("Retrying Steam3 connection...");
@@ -625,6 +635,7 @@ namespace DepotDownloader
 
                 return;
             }
+
             if (loggedOn.Result == EResult.TryAnotherCM)
             {
                 Console.Write("Retrying Steam3 connection (TryAnotherCM)...");
