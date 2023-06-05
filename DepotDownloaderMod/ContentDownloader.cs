@@ -7,11 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using SteamKit2;
 using SteamKit2.CDN;
 
 namespace DepotDownloader
 {
+
     public class ContentDownloaderException : Exception
     {
         public ContentDownloaderException(String value) : base(value) { }
@@ -191,27 +193,7 @@ namespace DepotDownloader
 
         static uint GetSteam3AppBuildNumber(uint appId, string branch)
         {
-            if (appId == INVALID_APP_ID)
-                return 0;
-
-
-            var depots = GetSteam3AppSection(appId, EAppInfoSection.Depots);
-            if (depots == null)
-            {
-                return 0;
-            }
-            var branches = depots["branches"];
-            var node = branches[branch];
-
-            if (node == KeyValue.Invalid)
-                return 0;
-
-            var buildid = node["buildid"];
-
-            if (buildid == KeyValue.Invalid)
-                return 0;
-
-            return uint.Parse(buildid.Value);
+            return appId;
         }
 
         static uint GetSteam3DepotProxyAppId(uint depotId, uint appId)
@@ -1283,13 +1265,20 @@ namespace DepotDownloader
                 {
                     connection = cdnPool.GetConnection(cts.Token);
 
+                    SteamApps.CDNAuthTokenCallback authData = null;
+
+                    authData = steam3.GetCDNAuthToken(depot.appId, depot.id, connection.VHost);
+
+                    var auth = (authData == null) ? null : authData.Token;
+
                     DebugLog.WriteLine("ContentDownloader", "Downloading chunk {0} from {1} with {2}", chunkID, connection, cdnPool.ProxyServer != null ? cdnPool.ProxyServer : "no proxy");
                     chunkData = await cdnPool.CDNClient.DownloadDepotChunkAsync(
                         depot.id,
                         data,
                         connection,
                         depot.depotKey,
-                        cdnPool.ProxyServer).ConfigureAwait(false);
+                        cdnPool.ProxyServer,
+                        auth).ConfigureAwait(false);
 
                     cdnPool.ReturnConnection(connection);
                 }
@@ -1375,6 +1364,7 @@ namespace DepotDownloader
                 Console.WriteLine("{0,6:#00.00}% {1}", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
             }
         }
+
 
         static void DumpManifestToTextFile(DepotDownloadInfo depot, ProtoManifest manifest)
         {

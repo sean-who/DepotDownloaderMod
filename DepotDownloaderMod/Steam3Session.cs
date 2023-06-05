@@ -444,6 +444,32 @@ namespace DepotDownloader
             return details;
         }
 
+        public SteamApps.CDNAuthTokenCallback GetCDNAuthToken(uint app, uint depot, string host_name)
+        {
+            var completed = false;
+            SteamApps.CDNAuthTokenCallback token = null;
+
+            Action<SteamApps.CDNAuthTokenCallback> cbMethod = callback =>
+            {
+                completed = true;
+                if (callback.Result == EResult.OK)
+                {
+                    token = callback;
+                }
+                else
+                {
+                    token = null;
+                }
+            };
+
+            WaitUntilCallback(() =>
+            {
+                callbacks.Subscribe(steamApps.GetCDNAuthToken(app,depot,host_name), cbMethod);
+            }, () => { return completed; });
+
+            return token;
+        }
+
         private void ResetConnectionFlags()
         {
             bExpectingDisconnectRemote = false;
