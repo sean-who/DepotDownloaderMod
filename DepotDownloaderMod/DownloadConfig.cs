@@ -22,11 +22,12 @@ namespace DepotDownloader
         public int MaxServers { get; set; }
         public int MaxDownloads { get; set; }
 
-        public string SuppliedPassword { get; set; }
         public bool RememberPassword { get; set; }
 
         // A Steam LoginID to allow multiple concurrent connections
         public uint? LoginID { get; set; }
+
+        public bool UseQrCode { get; set; }
 
         public bool UseManifestFile { get; set; }
         public string ManifestFile { get; set; }

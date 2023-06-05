@@ -24,7 +24,7 @@ namespace DepotDownloader
         public const uint INVALID_APP_ID = uint.MaxValue;
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
-        public const string DEFAULT_BRANCH = "Public";
+        public const string DEFAULT_BRANCH = "public";
 
         public static DownloadConfig Config = new DownloadConfig();
 
@@ -247,9 +247,9 @@ namespace DepotDownloader
             if (manifests.Children.Count == 0 && manifests_encrypted.Children.Count == 0)
                 return INVALID_MANIFEST_ID;
 
-            var node = manifests[branch].Children.Count > 0 ? manifests[branch]["gid"] : manifests[branch];
+            var node = manifests[branch]["gid"];
 
-            if (branch != "Public" && node == KeyValue.Invalid)
+            if (node == KeyValue.Invalid && !string.Equals(branch, DEFAULT_BRANCH, StringComparison.OrdinalIgnoreCase))
             {
                 var node_encrypted = manifests_encrypted[branch];
                 if (node_encrypted != KeyValue.Invalid)
@@ -261,35 +261,23 @@ namespace DepotDownloader
                         Config.BetaPassword = password = Console.ReadLine();
                     }
 
-                    var encrypted_v1 = node_encrypted["encrypted_gid"];
-                    var encrypted_v2 = node_encrypted["encrypted_gid_2"];
+                    var encrypted_gid = node_encrypted["gid"];
 
-                    if (encrypted_v1 != KeyValue.Invalid)
+                    if (encrypted_gid == KeyValue.Invalid)
                     {
-                        var input = Util.DecodeHexString(encrypted_v1.Value);
-                        var manifest_bytes = CryptoHelper.VerifyAndDecryptPassword(input, password);
-
-                        if (manifest_bytes == null)
-                        {
-                            Console.WriteLine("Password was invalid for branch {0}", branch);
-                            return INVALID_MANIFEST_ID;
-                        }
-
-                        return BitConverter.ToUInt64(manifest_bytes, 0);
+                        encrypted_gid = node_encrypted["encrypted_gid_2"];
                     }
 
-                    if (encrypted_v2 != KeyValue.Invalid)
+                    if (encrypted_gid != KeyValue.Invalid)
                     {
                         // Submit the password to Steam now to get encryption keys
                         steam3.CheckAppBetaPassword(appId, Config.BetaPassword);
-
                         if (!steam3.AppBetaPasswords.ContainsKey(branch))
                         {
                             Console.WriteLine("Password was invalid for branch {0}", branch);
                             return INVALID_MANIFEST_ID;
                         }
-
-                        var input = Util.DecodeHexString(encrypted_v2.Value);
+                        var input = Util.DecodeHexString(encrypted_gid.Value);
                         byte[] manifest_bytes;
                         try
                         {
@@ -300,20 +288,15 @@ namespace DepotDownloader
                             Console.WriteLine("Failed to decrypt branch {0}: {1}", branch, e.Message);
                             return INVALID_MANIFEST_ID;
                         }
-
                         return BitConverter.ToUInt64(manifest_bytes, 0);
                     }
-
                     Console.WriteLine("Unhandled depot encryption for depotId {0}", depotId);
                     return INVALID_MANIFEST_ID;
                 }
-
                 return INVALID_MANIFEST_ID;
             }
-
             if (node.Value == null)
                 return INVALID_MANIFEST_ID;
-
             return UInt64.Parse(node.Value);
         }
 
@@ -328,11 +311,11 @@ namespace DepotDownloader
 
         public static bool InitializeSteam3(string username, string password)
         {
-            string loginKey = null;
+            string loginToken = null;
 
             if (username != null && Config.RememberPassword)
             {
-                _ = AccountSettingsStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
+                _ = AccountSettingsStore.Instance.LoginTokens.TryGetValue(username, out loginToken);
             }
 
 
@@ -346,9 +329,9 @@ namespace DepotDownloader
                 {
                     SentryFileHash = sentryFileHash,
                     Username = username,
-                    Password = loginKey == null ? password : null,
+                    Password = loginToken == null ? password : null,
                     ShouldRememberPassword = Config.RememberPassword,
-                    LoginKey = loginKey,
+                    AccessToken = loginToken,
                     LoginID = Config.LoginID ?? 0x534B32, // "SK2"
                 }
                 );
@@ -359,9 +342,9 @@ namespace DepotDownloader
                 new SteamUser.LogOnDetails
                 {
                     Username = username,
-                    Password = loginKey == null ? password : null,
+                    Password = loginToken == null ? password : null,
                     ShouldRememberPassword = Config.RememberPassword,
-                    LoginKey = loginKey,
+                    AccessToken = loginToken,
                     LoginID = Config.LoginID ?? 0x534B32, // "SK2"
                 }
                 );
@@ -392,7 +375,6 @@ namespace DepotDownloader
             if (steam3 == null)
                 return;
 
-            steam3.TryWaitForLoginKey();
             steam3.Disconnect();
         }
 
@@ -636,10 +618,10 @@ namespace DepotDownloader
             if (manifestId == INVALID_MANIFEST_ID)
             {
                 manifestId = GetSteam3DepotManifest(depotId, appId, branch);
-                if (manifestId == INVALID_MANIFEST_ID && branch != "public")
+                if (manifestId == INVALID_MANIFEST_ID && !string.Equals(branch, DEFAULT_BRANCH, StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine("Warning: Depot {0} does not have branch named \"{1}\". Trying public branch.", depotId, branch);
-                    branch = "public";
+                    Console.WriteLine("Warning: Depot {0} does not have branch named \"{1}\". Trying {2} branch.", depotId, branch, DEFAULT_BRANCH);
+                    branch = DEFAULT_BRANCH;
                     manifestId = GetSteam3DepotManifest(depotId, appId, branch);
                 }
 
