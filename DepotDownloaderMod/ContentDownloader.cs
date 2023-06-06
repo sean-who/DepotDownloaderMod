@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using SteamKit2;
 using SteamKit2.CDN;
+using SteamKit2.Internal;
 
 namespace DepotDownloader
 {
@@ -1213,6 +1214,55 @@ namespace DepotDownloader
             }
         }
 
+        private sealed class CDNAuth
+        {
+            public uint app;
+            public uint depot;
+            public string host_name;
+            public string auth;
+            public DateTime Expiration;
+            public bool noauth = false;
+        }
+
+        private static List<CDNAuth> cdnAuths = new ();
+
+        private static string GetCDNAuth(uint app, uint depot, string host_name)
+        {
+            var authcache = cdnAuths.Find(x =>x.host_name == host_name);
+
+            if (authcache != null )
+            {
+                if (authcache.noauth)
+                {
+                    return null;
+                }
+                if (authcache.app == app && authcache.depot == depot &&
+                    DateTime.Compare(authcache.Expiration, DateTime.Now.ToUniversalTime()) > 0)
+                {
+                    return authcache.auth;
+                }
+                DebugLog.WriteLine("ContentDownloader", "CDN Auth expired, getting new one...");
+                cdnAuths.Remove(authcache);
+            }
+            SteamApps.CDNAuthTokenCallback authData = null;
+
+            authData = steam3.GetCDNAuthToken(app, depot, host_name);
+
+            if (authData != null && authData != null && authData.Token != String.Empty)
+            {
+                DebugLog.WriteLine("ContentDownloader", "Got new CDN {0} Auth {1}",host_name,authData.Token);
+                cdnAuths.Add(new CDNAuth{app=app,depot=depot,host_name = host_name,Expiration = authData.Expiration,auth = authData.Token});
+                return authData.Token;
+            }
+            
+            DebugLog.WriteLine("ContentDownloader", "No CDN Auth Required.");
+            cdnAuths.Add(new CDNAuth{app=app,depot=depot,host_name = host_name,noauth=true,});
+            return null;
+            
+
+           
+        }
+
         private static async Task DownloadSteam3AsyncDepotFileChunk(
             CancellationTokenSource cts, uint appId,
             GlobalDownloadCounter downloadCounter,
@@ -1247,12 +1297,6 @@ namespace DepotDownloader
                 {
                     connection = cdnPool.GetConnection(cts.Token);
 
-                    SteamApps.CDNAuthTokenCallback authData = null;
-
-                    authData = steam3.GetCDNAuthToken(depot.appId, depot.id, connection.VHost);
-
-                    var auth = (authData == null) ? null : authData.Token;
-
                     DebugLog.WriteLine("ContentDownloader", "Downloading chunk {0} from {1} with {2}", chunkID, connection, cdnPool.ProxyServer != null ? cdnPool.ProxyServer : "no proxy");
                     chunkData = await cdnPool.CDNClient.DownloadDepotChunkAsync(
                         depot.id,
@@ -1260,7 +1304,7 @@ namespace DepotDownloader
                         connection,
                         depot.depotKey,
                         cdnPool.ProxyServer,
-                        auth).ConfigureAwait(false);
+                        GetCDNAuth(depot.appId, depot.id, connection.VHost)).ConfigureAwait(false);
 
                     cdnPool.ReturnConnection(connection);
                 }
@@ -1340,13 +1384,41 @@ namespace DepotDownloader
                 downloadCounter.TotalBytesUncompressed += chunk.UncompressedLength;
             }
 
-            if (remainingChunks == 0)
+            if (DebugLog.Enabled && remainingChunks == 0)
             {
                 var fileFinalPath = Path.Combine(depot.installDir, file.FileName);
-                Console.WriteLine("{0,6:#00.00}% {1}", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
+                Console.Write("{0,6:#00.00}% {1}\n\n", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
+            }
+
+            if (!DebugLog.Enabled)
+            {
+                var consoleH = Console.WindowTop + Console.WindowHeight - 1;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.SetCursorPosition(0, consoleH);
+                Console.Write(new String(' ', Console.BufferWidth));
+                Console.SetCursorPosition(0, consoleH);
+                Console.Write("Total: {0,6:#00.00}% ({1})({2}/{3} Bytes)", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, Getspeed(sizeDownloaded), sizeDownloaded, depotDownloadCounter.CompleteDownloadSize);
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
         }
 
+        private static Stopwatch speedStopwatch = new ();
+        private static ulong lastDownloaded;
+
+        private static string Getspeed(ulong sizeDownloaded)
+        {
+            if (speedStopwatch.ElapsedMilliseconds == 0) 
+            {
+                speedStopwatch.Start();
+                return "N/A KB/s";
+            }
+            float speedbyte = ((sizeDownloaded - lastDownloaded) / ((float)speedStopwatch.ElapsedMilliseconds / 1000));
+            var speedkb = Math.Round(speedbyte / 1000);
+            lastDownloaded = sizeDownloaded;
+            speedStopwatch.Reset();
+            speedStopwatch.Start();
+            return speedkb + " KB/s";
+        }
 
         static void DumpManifestToTextFile(DepotDownloadInfo depot, ProtoManifest manifest)
         {
