@@ -115,7 +115,7 @@ def main(app_id,path=get_script_path()):
     return False
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-r', '--repo', default='wxy1343/ManifestAutoUpdate')
+parser.add_argument('-r', '--repo', default='heyong5454/ManifestAutoUpdate')
 parser.add_argument('-a', '--app-id')
 parser.add_argument('-p', '--output-path')
 args = parser.parse_args()
