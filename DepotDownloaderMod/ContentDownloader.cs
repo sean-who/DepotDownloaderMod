@@ -1226,7 +1226,7 @@ namespace DepotDownloader
 
         private static List<CDNAuth> cdnAuths = new ();
 
-        private static string GetCDNAuth(uint app, uint depot, string host_name)
+        private static string GetCDNAuth(uint app, uint depot, string host_name, bool force = false)
         {
             var authcache = cdnAuths.Find(x =>x.host_name == host_name);
 
@@ -1236,8 +1236,8 @@ namespace DepotDownloader
                 {
                     return null;
                 }
-                if (authcache.app == app && authcache.depot == depot &&
-                    DateTime.Compare(authcache.Expiration, DateTime.Now.ToUniversalTime()) > 0)
+                if ((authcache.app == app && authcache.depot == depot &&
+                    DateTime.Compare(authcache.Expiration, DateTime.Now.ToUniversalTime()) > 0) && !force)
                 {
                     return authcache.auth;
                 }
@@ -1319,6 +1319,7 @@ namespace DepotDownloader
                     if (e.StatusCode == HttpStatusCode.Unauthorized || e.StatusCode == HttpStatusCode.Forbidden)
                     {
                         Console.WriteLine("Encountered 401 for chunk {0}. Aborting.", chunkID);
+                        GetCDNAuth(depot.appId, depot.id, connection.VHost, true);
                         break;
                     }
 
