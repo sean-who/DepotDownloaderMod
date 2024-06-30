@@ -420,6 +420,23 @@ namespace SteamKit2.GC.Dota.Internal
         [global::ProtoBuf.ProtoMember(3)]
         public global::System.Collections.Generic.List<uint> declined_ids { get; } = new global::System.Collections.Generic.List<uint>();
 
+        [global::ProtoBuf.ProtoMember(4)]
+        public global::System.Collections.Generic.List<uint> accepted_indices { get; } = new global::System.Collections.Generic.List<uint>();
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public global::System.Collections.Generic.List<uint> declined_indices { get; } = new global::System.Collections.Generic.List<uint>();
+
+        [global::ProtoBuf.ProtoMember(6)]
+        [global::System.ComponentModel.DefaultValue(DOTALobbyReadyState.DOTALobbyReadyState_UNDECLARED)]
+        public DOTALobbyReadyState local_ready_state
+        {
+            get => __pbn__local_ready_state ?? DOTALobbyReadyState.DOTALobbyReadyState_UNDECLARED;
+            set => __pbn__local_ready_state = value;
+        }
+        public bool ShouldSerializelocal_ready_state() => __pbn__local_ready_state != null;
+        public void Resetlocal_ready_state() => __pbn__local_ready_state = null;
+        private DOTALobbyReadyState? __pbn__local_ready_state;
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -881,6 +898,16 @@ namespace SteamKit2.GC.Dota.Internal
 
         [global::ProtoBuf.ProtoMember(52)]
         public AbilityDraftSpecificDetails ability_draft_specific_details { get; set; }
+
+        [global::ProtoBuf.ProtoMember(53)]
+        public bool do_player_draft
+        {
+            get => __pbn__do_player_draft.GetValueOrDefault();
+            set => __pbn__do_player_draft = value;
+        }
+        public bool ShouldSerializedo_player_draft() => __pbn__do_player_draft != null;
+        public void Resetdo_player_draft() => __pbn__do_player_draft = null;
+        private bool? __pbn__do_player_draft;
 
         [global::ProtoBuf.ProtoContract()]
         public partial class AbilityDraftSpecificDetails : global::ProtoBuf.IExtensible
@@ -2781,6 +2808,7 @@ namespace SteamKit2.GC.Dota.Internal
         k_EStartFindingMatchResult_MatchmakingBusy = 132,
         k_EStartFindingMatchResult_SteamChinaBanned = 133,
         k_EStartFindingMatchResult_SteamChinaInvalidMixedParty = 134,
+        k_EStartFindingMatchResult_RestrictedFromRanked = 135,
     }
 
 }

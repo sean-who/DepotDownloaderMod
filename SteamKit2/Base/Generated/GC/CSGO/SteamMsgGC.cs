@@ -56,6 +56,16 @@ namespace SteamKit2.GC.CSGO.Internal
         public void Resetpurchase_type() => __pbn__purchase_type = null;
         private uint? __pbn__purchase_type;
 
+        [global::ProtoBuf.ProtoMember(5)]
+        public ulong supplemental_data
+        {
+            get => __pbn__supplemental_data.GetValueOrDefault();
+            set => __pbn__supplemental_data = value;
+        }
+        public bool ShouldSerializesupplemental_data() => __pbn__supplemental_data != null;
+        public void Resetsupplemental_data() => __pbn__supplemental_data = null;
+        private ulong? __pbn__supplemental_data;
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -976,6 +986,46 @@ namespace SteamKit2.GC.CSGO.Internal
         public void Resetsticker_wear() => __pbn__sticker_wear = null;
         private float? __pbn__sticker_wear;
 
+        [global::ProtoBuf.ProtoMember(6)]
+        public float sticker_rotation
+        {
+            get => __pbn__sticker_rotation.GetValueOrDefault();
+            set => __pbn__sticker_rotation = value;
+        }
+        public bool ShouldSerializesticker_rotation() => __pbn__sticker_rotation != null;
+        public void Resetsticker_rotation() => __pbn__sticker_rotation = null;
+        private float? __pbn__sticker_rotation;
+
+        [global::ProtoBuf.ProtoMember(7)]
+        public float sticker_scale
+        {
+            get => __pbn__sticker_scale.GetValueOrDefault();
+            set => __pbn__sticker_scale = value;
+        }
+        public bool ShouldSerializesticker_scale() => __pbn__sticker_scale != null;
+        public void Resetsticker_scale() => __pbn__sticker_scale = null;
+        private float? __pbn__sticker_scale;
+
+        [global::ProtoBuf.ProtoMember(8)]
+        public float sticker_offset_x
+        {
+            get => __pbn__sticker_offset_x.GetValueOrDefault();
+            set => __pbn__sticker_offset_x = value;
+        }
+        public bool ShouldSerializesticker_offset_x() => __pbn__sticker_offset_x != null;
+        public void Resetsticker_offset_x() => __pbn__sticker_offset_x = null;
+        private float? __pbn__sticker_offset_x;
+
+        [global::ProtoBuf.ProtoMember(9)]
+        public float sticker_offset_y
+        {
+            get => __pbn__sticker_offset_y.GetValueOrDefault();
+            set => __pbn__sticker_offset_y = value;
+        }
+        public bool ShouldSerializesticker_offset_y() => __pbn__sticker_offset_y != null;
+        public void Resetsticker_offset_y() => __pbn__sticker_offset_y = null;
+        private float? __pbn__sticker_offset_y;
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1636,17 +1686,6 @@ namespace SteamKit2.GC.CSGO.Internal
         public bool ShouldSerializeitem_schema_version() => __pbn__item_schema_version != null;
         public void Resetitem_schema_version() => __pbn__item_schema_version = null;
         private uint? __pbn__item_schema_version;
-
-        [global::ProtoBuf.ProtoMember(3)]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string items_game_url_DEPRECATED2013
-        {
-            get => __pbn__items_game_url_DEPRECATED2013 ?? "";
-            set => __pbn__items_game_url_DEPRECATED2013 = value;
-        }
-        public bool ShouldSerializeitems_game_url_DEPRECATED2013() => __pbn__items_game_url_DEPRECATED2013 != null;
-        public void Resetitems_game_url_DEPRECATED2013() => __pbn__items_game_url_DEPRECATED2013 = null;
-        private string __pbn__items_game_url_DEPRECATED2013;
 
         [global::ProtoBuf.ProtoMember(4)]
         [global::System.ComponentModel.DefaultValue("")]
@@ -3178,6 +3217,243 @@ namespace SteamKit2.GC.CSGO.Internal
             GAME = 1,
             PROXY = 2,
         }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CSOEconEquipSlot : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public uint account_id
+        {
+            get => __pbn__account_id.GetValueOrDefault();
+            set => __pbn__account_id = value;
+        }
+        public bool ShouldSerializeaccount_id() => __pbn__account_id != null;
+        public void Resetaccount_id() => __pbn__account_id = null;
+        private uint? __pbn__account_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public uint class_id
+        {
+            get => __pbn__class_id.GetValueOrDefault();
+            set => __pbn__class_id = value;
+        }
+        public bool ShouldSerializeclass_id() => __pbn__class_id != null;
+        public void Resetclass_id() => __pbn__class_id = null;
+        private uint? __pbn__class_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public uint slot_id
+        {
+            get => __pbn__slot_id.GetValueOrDefault();
+            set => __pbn__slot_id = value;
+        }
+        public bool ShouldSerializeslot_id() => __pbn__slot_id != null;
+        public void Resetslot_id() => __pbn__slot_id = null;
+        private uint? __pbn__slot_id;
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public ulong item_id
+        {
+            get => __pbn__item_id.GetValueOrDefault();
+            set => __pbn__item_id = value;
+        }
+        public bool ShouldSerializeitem_id() => __pbn__item_id != null;
+        public void Resetitem_id() => __pbn__item_id = null;
+        private ulong? __pbn__item_id;
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public uint item_definition
+        {
+            get => __pbn__item_definition.GetValueOrDefault();
+            set => __pbn__item_definition = value;
+        }
+        public bool ShouldSerializeitem_definition() => __pbn__item_definition != null;
+        public void Resetitem_definition() => __pbn__item_definition = null;
+        private uint? __pbn__item_definition;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CMsgAdjustEquipSlot : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public uint class_id
+        {
+            get => __pbn__class_id.GetValueOrDefault();
+            set => __pbn__class_id = value;
+        }
+        public bool ShouldSerializeclass_id() => __pbn__class_id != null;
+        public void Resetclass_id() => __pbn__class_id = null;
+        private uint? __pbn__class_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public uint slot_id
+        {
+            get => __pbn__slot_id.GetValueOrDefault();
+            set => __pbn__slot_id = value;
+        }
+        public bool ShouldSerializeslot_id() => __pbn__slot_id != null;
+        public void Resetslot_id() => __pbn__slot_id = null;
+        private uint? __pbn__slot_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public ulong item_id
+        {
+            get => __pbn__item_id.GetValueOrDefault();
+            set => __pbn__item_id = value;
+        }
+        public bool ShouldSerializeitem_id() => __pbn__item_id != null;
+        public void Resetitem_id() => __pbn__item_id = null;
+        private ulong? __pbn__item_id;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CMsgAdjustEquipSlots : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public global::System.Collections.Generic.List<CMsgAdjustEquipSlot> slots { get; } = new global::System.Collections.Generic.List<CMsgAdjustEquipSlot>();
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public uint change_num
+        {
+            get => __pbn__change_num.GetValueOrDefault();
+            set => __pbn__change_num = value;
+        }
+        public bool ShouldSerializechange_num() => __pbn__change_num != null;
+        public void Resetchange_num() => __pbn__change_num = null;
+        private uint? __pbn__change_num;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CMsgOpenCrate : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public ulong tool_item_id
+        {
+            get => __pbn__tool_item_id.GetValueOrDefault();
+            set => __pbn__tool_item_id = value;
+        }
+        public bool ShouldSerializetool_item_id() => __pbn__tool_item_id != null;
+        public void Resettool_item_id() => __pbn__tool_item_id = null;
+        private ulong? __pbn__tool_item_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public ulong subject_item_id
+        {
+            get => __pbn__subject_item_id.GetValueOrDefault();
+            set => __pbn__subject_item_id = value;
+        }
+        public bool ShouldSerializesubject_item_id() => __pbn__subject_item_id != null;
+        public void Resetsubject_item_id() => __pbn__subject_item_id = null;
+        private ulong? __pbn__subject_item_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public bool for_rental
+        {
+            get => __pbn__for_rental.GetValueOrDefault();
+            set => __pbn__for_rental = value;
+        }
+        public bool ShouldSerializefor_rental() => __pbn__for_rental != null;
+        public void Resetfor_rental() => __pbn__for_rental = null;
+        private bool? __pbn__for_rental;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CSOEconRentalHistory : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public uint account_id
+        {
+            get => __pbn__account_id.GetValueOrDefault();
+            set => __pbn__account_id = value;
+        }
+        public bool ShouldSerializeaccount_id() => __pbn__account_id != null;
+        public void Resetaccount_id() => __pbn__account_id = null;
+        private uint? __pbn__account_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public ulong crate_item_id
+        {
+            get => __pbn__crate_item_id.GetValueOrDefault();
+            set => __pbn__crate_item_id = value;
+        }
+        public bool ShouldSerializecrate_item_id() => __pbn__crate_item_id != null;
+        public void Resetcrate_item_id() => __pbn__crate_item_id = null;
+        private ulong? __pbn__crate_item_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public uint crate_def_index
+        {
+            get => __pbn__crate_def_index.GetValueOrDefault();
+            set => __pbn__crate_def_index = value;
+        }
+        public bool ShouldSerializecrate_def_index() => __pbn__crate_def_index != null;
+        public void Resetcrate_def_index() => __pbn__crate_def_index = null;
+        private uint? __pbn__crate_def_index;
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public uint issue_date
+        {
+            get => __pbn__issue_date.GetValueOrDefault();
+            set => __pbn__issue_date = value;
+        }
+        public bool ShouldSerializeissue_date() => __pbn__issue_date != null;
+        public void Resetissue_date() => __pbn__issue_date = null;
+        private uint? __pbn__issue_date;
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public uint expiration_date
+        {
+            get => __pbn__expiration_date.GetValueOrDefault();
+            set => __pbn__expiration_date = value;
+        }
+        public bool ShouldSerializeexpiration_date() => __pbn__expiration_date != null;
+        public void Resetexpiration_date() => __pbn__expiration_date = null;
+        private uint? __pbn__expiration_date;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CMsgAcknowledgeRentalExpiration : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public ulong crate_item_id
+        {
+            get => __pbn__crate_item_id.GetValueOrDefault();
+            set => __pbn__crate_item_id = value;
+        }
+        public bool ShouldSerializecrate_item_id() => __pbn__crate_item_id != null;
+        public void Resetcrate_item_id() => __pbn__crate_item_id = null;
+        private ulong? __pbn__crate_item_id;
 
     }
 

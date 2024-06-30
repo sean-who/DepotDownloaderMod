@@ -2,7 +2,7 @@ DepotDownloaderMod
 ===============
 IMPROTANT: This Tool require a manifest file to work Due to GetManifestRequestCode Verification.
 
-Steam depot downloader utilizing the SteamKit2 library with depot keys support and many other features. Supports .NET 6.0  
+Steam depot downloader utilizing the SteamKit2 library with depot keys support and many other features. Supports .NET 8.0  
 
 Works with keys from SteamTools:  
 

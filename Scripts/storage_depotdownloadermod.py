@@ -14,7 +14,7 @@ from multiprocessing.dummy import Pool, Lock
 lock = Lock()
 
 depotdownloader = "DepotDownloadermod.exe"
-depotdownlaoderargs = "-max-servers 128 -max-downloads 256"
+depotdownlaoderargs = "-max-servers 128 -max-downloads 256 -verify-all"
 
 def get(sha, path):
     url_list = [f'https://cdn.jsdelivr.net/gh/{repo}@{sha}/{path}',
@@ -54,6 +54,12 @@ def get_manifest(sha, path, output_path: Path, app_id=None):
             downloader_add(app_id,path,output_path)
 
         elif path == 'config.vdf':
+            content = get(sha, path)
+            with lock:
+                print(f'密钥下载成功: {path}')
+            depots_config = vdf.loads(content.decode(encoding='utf-8'))
+
+        elif path == 'Key.vdf':
             content = get(sha, path)
             with lock:
                 print(f'密钥下载成功: {path}')
@@ -115,7 +121,7 @@ def main(app_id,path=get_script_path()):
     return False
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-r', '--repo', default='heyong5454/ManifestAutoUpdate')
+parser.add_argument('-r', '--repo', default='ManifestHub/ManifestHub')
 parser.add_argument('-a', '--app-id')
 parser.add_argument('-p', '--output-path')
 args = parser.parse_args()

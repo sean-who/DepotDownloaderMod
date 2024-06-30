@@ -109,6 +109,9 @@ namespace SteamKit2.GC.Dota.Internal
         [global::ProtoBuf.ProtoMember(12)]
         public global::System.Collections.Generic.List<Tip> match_tips { get; } = new global::System.Collections.Generic.List<Tip>();
 
+        [global::ProtoBuf.ProtoMember(13)]
+        public global::System.Collections.Generic.List<CMsgTrackedStat> match_tracked_stats { get; } = new global::System.Collections.Generic.List<CMsgTrackedStat>();
+
         [global::ProtoBuf.ProtoContract()]
         public partial class EconItem : global::ProtoBuf.IExtensible
         {
@@ -215,6 +218,9 @@ namespace SteamKit2.GC.Dota.Internal
             public bool ShouldSerializecm_penalty() => __pbn__cm_penalty != null;
             public void Resetcm_penalty() => __pbn__cm_penalty = null;
             private uint? __pbn__cm_penalty;
+
+            [global::ProtoBuf.ProtoMember(11)]
+            public global::System.Collections.Generic.List<CMsgTrackedStat> team_tracked_stats { get; } = new global::System.Collections.Generic.List<CMsgTrackedStat>();
 
             [global::ProtoBuf.ProtoContract()]
             public partial class PlayerKill : global::ProtoBuf.IExtensible
@@ -625,16 +631,6 @@ namespace SteamKit2.GC.Dota.Internal
                 public void Resetaudit() => __pbn__audit = null;
                 private uint? __pbn__audit;
 
-                [global::ProtoBuf.ProtoMember(4)]
-                public bool requires_win
-                {
-                    get => __pbn__requires_win.GetValueOrDefault();
-                    set => __pbn__requires_win = value;
-                }
-                public bool ShouldSerializerequires_win() => __pbn__requires_win != null;
-                public void Resetrequires_win() => __pbn__requires_win = null;
-                private bool? __pbn__requires_win;
-
                 [global::ProtoBuf.ProtoMember(5)]
                 public ulong audit_data
                 {
@@ -937,6 +933,9 @@ namespace SteamKit2.GC.Dota.Internal
 
                 [global::ProtoBuf.ProtoMember(26)]
                 public global::System.Collections.Generic.List<CDOTAMatchMetadata.Team.PeriodicResourceData> periodic_resources { get; } = new global::System.Collections.Generic.List<CDOTAMatchMetadata.Team.PeriodicResourceData>();
+
+                [global::ProtoBuf.ProtoMember(27)]
+                public global::System.Collections.Generic.List<CExtraMsgBlock> extra_event_messages { get; } = new global::System.Collections.Generic.List<CExtraMsgBlock>();
 
             }
 
@@ -1393,6 +1392,23 @@ namespace SteamKit2.GC.Dota.Internal
                 [global::ProtoBuf.ProtoMember(56)]
                 public global::System.Collections.Generic.List<CDOTAMatchMetadata.EconItem> equipped_econ_items { get; } = new global::System.Collections.Generic.List<CDOTAMatchMetadata.EconItem>();
 
+                [global::ProtoBuf.ProtoMember(57)]
+                [global::System.ComponentModel.DefaultValue(-1)]
+                public int game_player_id
+                {
+                    get => __pbn__game_player_id ?? -1;
+                    set => __pbn__game_player_id = value;
+                }
+                public bool ShouldSerializegame_player_id() => __pbn__game_player_id != null;
+                public void Resetgame_player_id() => __pbn__game_player_id = null;
+                private int? __pbn__game_player_id;
+
+                [global::ProtoBuf.ProtoMember(58)]
+                public global::System.Collections.Generic.List<CMsgTrackedStat> player_tracked_stats { get; } = new global::System.Collections.Generic.List<CMsgTrackedStat>();
+
+                [global::ProtoBuf.ProtoMember(59)]
+                public OverworldRewards overworld_rewards { get; set; }
+
                 [global::ProtoBuf.ProtoContract()]
                 public partial class ContractProgress : global::ProtoBuf.IExtensible
                 {
@@ -1469,6 +1485,28 @@ namespace SteamKit2.GC.Dota.Internal
                     public bool ShouldSerializecompleted() => __pbn__completed != null;
                     public void Resetcompleted() => __pbn__completed = null;
                     private bool? __pbn__completed;
+
+                }
+
+                [global::ProtoBuf.ProtoContract()]
+                public partial class OverworldRewards : global::ProtoBuf.IExtensible
+                {
+                    private global::ProtoBuf.IExtension __pbn__extensionData;
+                    global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+                        => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+                    [global::ProtoBuf.ProtoMember(1)]
+                    public uint overworld_id
+                    {
+                        get => __pbn__overworld_id.GetValueOrDefault();
+                        set => __pbn__overworld_id = value;
+                    }
+                    public bool ShouldSerializeoverworld_id() => __pbn__overworld_id != null;
+                    public void Resetoverworld_id() => __pbn__overworld_id = null;
+                    private uint? __pbn__overworld_id;
+
+                    [global::ProtoBuf.ProtoMember(2)]
+                    public CMsgOverworldTokenQuantity tokens { get; set; }
 
                 }
 
@@ -2164,6 +2202,16 @@ namespace SteamKit2.GC.Dota.Internal
                     public bool ShouldSerializeother() => __pbn__other != null;
                     public void Resetother() => __pbn__other = null;
                     private uint? __pbn__other;
+
+                    [global::ProtoBuf.ProtoMember(7)]
+                    public uint abilities
+                    {
+                        get => __pbn__abilities.GetValueOrDefault();
+                        set => __pbn__abilities = value;
+                    }
+                    public bool ShouldSerializeabilities() => __pbn__abilities != null;
+                    public void Resetabilities() => __pbn__abilities = null;
+                    private uint? __pbn__abilities;
 
                 }
 

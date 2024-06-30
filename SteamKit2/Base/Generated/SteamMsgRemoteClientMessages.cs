@@ -48,6 +48,25 @@ namespace SteamKit2.Internal
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_DeleteSession_Notification : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong session_id
+        {
+            get => __pbn__session_id.GetValueOrDefault();
+            set => __pbn__session_id = value;
+        }
+        public bool ShouldSerializesession_id() => __pbn__session_id != null;
+        public void Resetsession_id() => __pbn__session_id = null;
+        private ulong? __pbn__session_id;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class CRemoteClient_StartPairing_Request : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -288,6 +307,46 @@ namespace SteamKit2.Internal
     }
 
     [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_DeviceDetails : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string device_friendly_name
+        {
+            get => __pbn__device_friendly_name ?? "";
+            set => __pbn__device_friendly_name = value;
+        }
+        public bool ShouldSerializedevice_friendly_name() => __pbn__device_friendly_name != null;
+        public void Resetdevice_friendly_name() => __pbn__device_friendly_name = null;
+        private string __pbn__device_friendly_name;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public int os_type
+        {
+            get => __pbn__os_type.GetValueOrDefault();
+            set => __pbn__os_type = value;
+        }
+        public bool ShouldSerializeos_type() => __pbn__os_type != null;
+        public void Resetos_type() => __pbn__os_type = null;
+        private int? __pbn__os_type;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public uint gaming_device_type
+        {
+            get => __pbn__gaming_device_type.GetValueOrDefault();
+            set => __pbn__gaming_device_type = value;
+        }
+        public bool ShouldSerializegaming_device_type() => __pbn__gaming_device_type != null;
+        public void Resetgaming_device_type() => __pbn__gaming_device_type = null;
+        private uint? __pbn__gaming_device_type;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
     public partial class CRemoteClient_Online_Notification : global::ProtoBuf.IExtensible
     {
         private global::ProtoBuf.IExtension __pbn__extensionData;
@@ -313,6 +372,290 @@ namespace SteamKit2.Internal
         public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
         public void Resetremote_client_id() => __pbn__remote_client_id = null;
         private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public CRemoteClient_DeviceDetails device_details { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_GetRecentClients_Request : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_ClientLogin : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong remote_client_id
+        {
+            get => __pbn__remote_client_id.GetValueOrDefault();
+            set => __pbn__remote_client_id = value;
+        }
+        public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
+        public void Resetremote_client_id() => __pbn__remote_client_id = null;
+        private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(2, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong token_id
+        {
+            get => __pbn__token_id.GetValueOrDefault();
+            set => __pbn__token_id = value;
+        }
+        public bool ShouldSerializetoken_id() => __pbn__token_id != null;
+        public void Resettoken_id() => __pbn__token_id = null;
+        private ulong? __pbn__token_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public CRemoteClient_DeviceDetails device_details { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_ClientDetails : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong remote_client_id
+        {
+            get => __pbn__remote_client_id.GetValueOrDefault();
+            set => __pbn__remote_client_id = value;
+        }
+        public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
+        public void Resetremote_client_id() => __pbn__remote_client_id = null;
+        private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public CRemoteClient_DeviceDetails device_details { get; set; }
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public ulong last_seen
+        {
+            get => __pbn__last_seen.GetValueOrDefault();
+            set => __pbn__last_seen = value;
+        }
+        public bool ShouldSerializelast_seen() => __pbn__last_seen != null;
+        public void Resetlast_seen() => __pbn__last_seen = null;
+        private ulong? __pbn__last_seen;
+
+        [global::ProtoBuf.ProtoMember(5)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string city
+        {
+            get => __pbn__city ?? "";
+            set => __pbn__city = value;
+        }
+        public bool ShouldSerializecity() => __pbn__city != null;
+        public void Resetcity() => __pbn__city = null;
+        private string __pbn__city;
+
+        [global::ProtoBuf.ProtoMember(6)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string state
+        {
+            get => __pbn__state ?? "";
+            set => __pbn__state = value;
+        }
+        public bool ShouldSerializestate() => __pbn__state != null;
+        public void Resetstate() => __pbn__state = null;
+        private string __pbn__state;
+
+        [global::ProtoBuf.ProtoMember(7)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string country
+        {
+            get => __pbn__country ?? "";
+            set => __pbn__country = value;
+        }
+        public bool ShouldSerializecountry() => __pbn__country != null;
+        public void Resetcountry() => __pbn__country = null;
+        private string __pbn__country;
+
+        [global::ProtoBuf.ProtoMember(8)]
+        public bool is_online
+        {
+            get => __pbn__is_online.GetValueOrDefault();
+            set => __pbn__is_online = value;
+        }
+        public bool ShouldSerializeis_online() => __pbn__is_online != null;
+        public void Resetis_online() => __pbn__is_online = null;
+        private bool? __pbn__is_online;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_GetRecentClients_Response : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public global::System.Collections.Generic.List<CRemoteClient_ClientDetails> clients { get; } = new global::System.Collections.Generic.List<CRemoteClient_ClientDetails>();
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_Task : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        [global::System.ComponentModel.DefaultValue(ECLientTaskListType.k_EClientTask_DownloadClip)]
+        public ECLientTaskListType type
+        {
+            get => __pbn__type ?? ECLientTaskListType.k_EClientTask_DownloadClip;
+            set => __pbn__type = value;
+        }
+        public bool ShouldSerializetype() => __pbn__type != null;
+        public void Resettype() => __pbn__type = null;
+        private ECLientTaskListType? __pbn__type;
+
+        [global::ProtoBuf.ProtoMember(2, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong task_id
+        {
+            get => __pbn__task_id.GetValueOrDefault();
+            set => __pbn__task_id = value;
+        }
+        public bool ShouldSerializetask_id() => __pbn__task_id != null;
+        public void Resettask_id() => __pbn__task_id = null;
+        private ulong? __pbn__task_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string url
+        {
+            get => __pbn__url ?? "";
+            set => __pbn__url = value;
+        }
+        public bool ShouldSerializeurl() => __pbn__url != null;
+        public void Reseturl() => __pbn__url = null;
+        private string __pbn__url;
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public long file_id
+        {
+            get => __pbn__file_id.GetValueOrDefault();
+            set => __pbn__file_id = value;
+        }
+        public bool ShouldSerializefile_id() => __pbn__file_id != null;
+        public void Resetfile_id() => __pbn__file_id = null;
+        private long? __pbn__file_id;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_AddClientTask_Request : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong remote_client_id
+        {
+            get => __pbn__remote_client_id.GetValueOrDefault();
+            set => __pbn__remote_client_id = value;
+        }
+        public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
+        public void Resetremote_client_id() => __pbn__remote_client_id = null;
+        private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public CRemoteClient_Task task { get; set; }
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_AddClientTask_Response : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_TaskList_Notification : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong remote_client_id
+        {
+            get => __pbn__remote_client_id.GetValueOrDefault();
+            set => __pbn__remote_client_id = value;
+        }
+        public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
+        public void Resetremote_client_id() => __pbn__remote_client_id = null;
+        private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public global::System.Collections.Generic.List<CRemoteClient_Task> tasklist { get; } = new global::System.Collections.Generic.List<CRemoteClient_Task>();
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_MarkTaskComplete_Request : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong remote_client_id
+        {
+            get => __pbn__remote_client_id.GetValueOrDefault();
+            set => __pbn__remote_client_id = value;
+        }
+        public bool ShouldSerializeremote_client_id() => __pbn__remote_client_id != null;
+        public void Resetremote_client_id() => __pbn__remote_client_id = null;
+        private ulong? __pbn__remote_client_id;
+
+        [global::ProtoBuf.ProtoMember(2, DataFormat = global::ProtoBuf.DataFormat.FixedSize)]
+        public ulong task_id
+        {
+            get => __pbn__task_id.GetValueOrDefault();
+            set => __pbn__task_id = value;
+        }
+        public bool ShouldSerializetask_id() => __pbn__task_id != null;
+        public void Resettask_id() => __pbn__task_id = null;
+        private ulong? __pbn__task_id;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        [global::System.ComponentModel.DefaultValue("")]
+        public string content_id
+        {
+            get => __pbn__content_id ?? "";
+            set => __pbn__content_id = value;
+        }
+        public bool ShouldSerializecontent_id() => __pbn__content_id != null;
+        public void Resetcontent_id() => __pbn__content_id = null;
+        private string __pbn__content_id;
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CRemoteClient_MarkTaskComplete_Response : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
 
     }
 
@@ -412,56 +755,6 @@ namespace SteamKit2.Internal
 
         [global::ProtoBuf.ProtoMember(1)]
         public global::System.Collections.Generic.List<byte[]> payload { get; } = new global::System.Collections.Generic.List<byte[]>();
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class CRemoteClient_AllocateTURNServer_Request : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1)]
-        public uint cellid
-        {
-            get => __pbn__cellid.GetValueOrDefault();
-            set => __pbn__cellid = value;
-        }
-        public bool ShouldSerializecellid() => __pbn__cellid != null;
-        public void Resetcellid() => __pbn__cellid = null;
-        private uint? __pbn__cellid;
-
-        [global::ProtoBuf.ProtoMember(2)]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string credentials
-        {
-            get => __pbn__credentials ?? "";
-            set => __pbn__credentials = value;
-        }
-        public bool ShouldSerializecredentials() => __pbn__credentials != null;
-        public void Resetcredentials() => __pbn__credentials = null;
-        private string __pbn__credentials;
-
-    }
-
-    [global::ProtoBuf.ProtoContract()]
-    public partial class CRemoteClient_AllocateTURNServer_Response : global::ProtoBuf.IExtensible
-    {
-        private global::ProtoBuf.IExtension __pbn__extensionData;
-        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
-            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
-
-        [global::ProtoBuf.ProtoMember(1)]
-        [global::System.ComponentModel.DefaultValue("")]
-        public string turn_server
-        {
-            get => __pbn__turn_server ?? "";
-            set => __pbn__turn_server = value;
-        }
-        public bool ShouldSerializeturn_server() => __pbn__turn_server != null;
-        public void Resetturn_server() => __pbn__turn_server = null;
-        private string __pbn__turn_server;
 
     }
 
@@ -1108,6 +1401,152 @@ namespace SteamKit2.Internal
         public void Resetinvitation_url() => __pbn__invitation_url = null;
         private string __pbn__invitation_url;
 
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CCMRemoteClient_ClientMessage : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public CRemoteClient_CreateSession_Request create_session_request
+        {
+            get => __pbn__Message.Is(1) ? ((CRemoteClient_CreateSession_Request)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(1, value);
+        }
+        public bool ShouldSerializecreate_session_request() => __pbn__Message.Is(1);
+        public void Resetcreate_session_request() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 1);
+
+        private global::ProtoBuf.DiscriminatedUnionObject __pbn__Message;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public CRemoteClient_StartPairing_Request start_pairing_request
+        {
+            get => __pbn__Message.Is(2) ? ((CRemoteClient_StartPairing_Request)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(2, value);
+        }
+        public bool ShouldSerializestart_pairing_request() => __pbn__Message.Is(2);
+        public void Resetstart_pairing_request() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 2);
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public CRemoteClient_SetPairingInfo_Request set_pairing_info_request
+        {
+            get => __pbn__Message.Is(3) ? ((CRemoteClient_SetPairingInfo_Request)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(3, value);
+        }
+        public bool ShouldSerializeset_pairing_info_request() => __pbn__Message.Is(3);
+        public void Resetset_pairing_info_request() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 3);
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public CRemoteClient_CancelPairing_Request cancel_pairing_request
+        {
+            get => __pbn__Message.Is(4) ? ((CRemoteClient_CancelPairing_Request)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(4, value);
+        }
+        public bool ShouldSerializecancel_pairing_request() => __pbn__Message.Is(4);
+        public void Resetcancel_pairing_request() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 4);
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public CRemoteClient_RegisterStatusUpdate_Notification register_status_update
+        {
+            get => __pbn__Message.Is(5) ? ((CRemoteClient_RegisterStatusUpdate_Notification)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(5, value);
+        }
+        public bool ShouldSerializeregister_status_update() => __pbn__Message.Is(5);
+        public void Resetregister_status_update() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 5);
+
+        [global::ProtoBuf.ProtoMember(6)]
+        public CRemoteClient_UnregisterStatusUpdate_Notification unregister_status_update
+        {
+            get => __pbn__Message.Is(6) ? ((CRemoteClient_UnregisterStatusUpdate_Notification)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(6, value);
+        }
+        public bool ShouldSerializeunregister_status_update() => __pbn__Message.Is(6);
+        public void Resetunregister_status_update() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 6);
+
+        [global::ProtoBuf.ProtoMember(7)]
+        public CRemoteClient_RemotePacket_Notification remote_packet
+        {
+            get => __pbn__Message.Is(7) ? ((CRemoteClient_RemotePacket_Notification)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(7, value);
+        }
+        public bool ShouldSerializeremote_packet() => __pbn__Message.Is(7);
+        public void Resetremote_packet() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 7);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public partial class CCMRemoteClient_ServerMessage : global::ProtoBuf.IExtensible
+    {
+        private global::ProtoBuf.IExtension __pbn__extensionData;
+        global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+            => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+        [global::ProtoBuf.ProtoMember(1)]
+        public int result
+        {
+            get => __pbn__result.GetValueOrDefault();
+            set => __pbn__result = value;
+        }
+        public bool ShouldSerializeresult() => __pbn__result != null;
+        public void Resetresult() => __pbn__result = null;
+        private int? __pbn__result;
+
+        [global::ProtoBuf.ProtoMember(2)]
+        public CRemoteClient_CreateSession_Response create_session_response
+        {
+            get => __pbn__Message.Is(2) ? ((CRemoteClient_CreateSession_Response)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(2, value);
+        }
+        public bool ShouldSerializecreate_session_response() => __pbn__Message.Is(2);
+        public void Resetcreate_session_response() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 2);
+
+        private global::ProtoBuf.DiscriminatedUnionObject __pbn__Message;
+
+        [global::ProtoBuf.ProtoMember(3)]
+        public CRemoteClient_StartPairing_Response start_pairing_response
+        {
+            get => __pbn__Message.Is(3) ? ((CRemoteClient_StartPairing_Response)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(3, value);
+        }
+        public bool ShouldSerializestart_pairing_response() => __pbn__Message.Is(3);
+        public void Resetstart_pairing_response() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 3);
+
+        [global::ProtoBuf.ProtoMember(4)]
+        public CRemoteClient_SetPairingInfo_Response set_pairing_info_response
+        {
+            get => __pbn__Message.Is(4) ? ((CRemoteClient_SetPairingInfo_Response)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(4, value);
+        }
+        public bool ShouldSerializeset_pairing_info_response() => __pbn__Message.Is(4);
+        public void Resetset_pairing_info_response() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 4);
+
+        [global::ProtoBuf.ProtoMember(5)]
+        public CRemoteClient_CancelPairing_Response cancel_pairing_response
+        {
+            get => __pbn__Message.Is(5) ? ((CRemoteClient_CancelPairing_Response)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(5, value);
+        }
+        public bool ShouldSerializecancel_pairing_response() => __pbn__Message.Is(5);
+        public void Resetcancel_pairing_response() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 5);
+
+        [global::ProtoBuf.ProtoMember(6)]
+        public CRemoteClient_GetReplies_Response reply_packet
+        {
+            get => __pbn__Message.Is(6) ? ((CRemoteClient_GetReplies_Response)__pbn__Message.Object) : default;
+            set => __pbn__Message = new global::ProtoBuf.DiscriminatedUnionObject(6, value);
+        }
+        public bool ShouldSerializereply_packet() => __pbn__Message.Is(6);
+        public void Resetreply_packet() => global::ProtoBuf.DiscriminatedUnionObject.Reset(ref __pbn__Message, 6);
+
+    }
+
+    [global::ProtoBuf.ProtoContract()]
+    public enum ECLientTaskListType
+    {
+        k_EClientTask_DownloadClip = 1,
     }
 
 }

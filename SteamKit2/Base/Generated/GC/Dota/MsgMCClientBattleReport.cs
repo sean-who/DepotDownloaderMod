@@ -554,6 +554,16 @@ namespace SteamKit2.GC.Dota.Internal
         public void Resetitem5() => __pbn__item5 = null;
         private int? __pbn__item5;
 
+        [global::ProtoBuf.ProtoMember(51)]
+        public uint selected_facet
+        {
+            get => __pbn__selected_facet.GetValueOrDefault();
+            set => __pbn__selected_facet = value;
+        }
+        public bool ShouldSerializeselected_facet() => __pbn__selected_facet != null;
+        public void Resetselected_facet() => __pbn__selected_facet = null;
+        private uint? __pbn__selected_facet;
+
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1465,7 +1475,7 @@ namespace SteamKit2.GC.Dota.Internal
         k_eSafelane = 0,
         k_eMidlane = 1,
         k_eOfflane = 2,
-        k_eSoftSupport = 3,
+        k_eSupport = 3,
         k_eHardSupport = 4,
     }
 

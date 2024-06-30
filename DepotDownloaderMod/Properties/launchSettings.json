@@ -1,7 +1,9 @@
 {
   "profiles": {
     "DepotDownloaderMod": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-app 2553050 -depot 2553051 -manifest 2447965233829436464 -manifestfile 2553051_2447965233829436464.manifest -depotkeys 2553050.key -max-servers 128 -max-downloads 256 -verify-all\r\n",
+      "workingDirectory": "H:\\DepotDownloaderMod"
     }
   }
 }

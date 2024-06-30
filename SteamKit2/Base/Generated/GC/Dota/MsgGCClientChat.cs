@@ -439,16 +439,6 @@ namespace SteamKit2.GC.Dota.Internal
         public void Resetsuggest_invite_to_lobby() => __pbn__suggest_invite_to_lobby = null;
         private bool? __pbn__suggest_invite_to_lobby;
 
-        [global::ProtoBuf.ProtoMember(12)]
-        public uint event_points
-        {
-            get => __pbn__event_points.GetValueOrDefault();
-            set => __pbn__event_points = value;
-        }
-        public bool ShouldSerializeevent_points() => __pbn__event_points != null;
-        public void Resetevent_points() => __pbn__event_points = null;
-        private uint? __pbn__event_points;
-
         [global::ProtoBuf.ProtoMember(13)]
         public bool coin_flip
         {
@@ -679,6 +669,43 @@ namespace SteamKit2.GC.Dota.Internal
         public void Resetfavorite_team_quality() => __pbn__favorite_team_quality = null;
         private uint? __pbn__favorite_team_quality;
 
+        [global::ProtoBuf.ProtoMember(39)]
+        [global::System.ComponentModel.DefaultValue(-1)]
+        public int suggest_player_draft_pick
+        {
+            get => __pbn__suggest_player_draft_pick ?? -1;
+            set => __pbn__suggest_player_draft_pick = value;
+        }
+        public bool ShouldSerializesuggest_player_draft_pick() => __pbn__suggest_player_draft_pick != null;
+        public void Resetsuggest_player_draft_pick() => __pbn__suggest_player_draft_pick = null;
+        private int? __pbn__suggest_player_draft_pick;
+
+        [global::ProtoBuf.ProtoMember(40)]
+        public PlayerDraftPick player_draft_pick { get; set; }
+
+        [global::ProtoBuf.ProtoMember(41)]
+        public ChatWheelMessage chat_wheel_message { get; set; }
+
+        [global::ProtoBuf.ProtoMember(42)]
+        public uint event_level
+        {
+            get => __pbn__event_level.GetValueOrDefault();
+            set => __pbn__event_level = value;
+        }
+        public bool ShouldSerializeevent_level() => __pbn__event_level != null;
+        public void Resetevent_level() => __pbn__event_level = null;
+        private uint? __pbn__event_level;
+
+        [global::ProtoBuf.ProtoMember(43)]
+        public uint suggest_pick_hero_facet
+        {
+            get => __pbn__suggest_pick_hero_facet.GetValueOrDefault();
+            set => __pbn__suggest_pick_hero_facet = value;
+        }
+        public bool ShouldSerializesuggest_pick_hero_facet() => __pbn__suggest_pick_hero_facet != null;
+        public void Resetsuggest_pick_hero_facet() => __pbn__suggest_pick_hero_facet = null;
+        private uint? __pbn__suggest_pick_hero_facet;
+
         [global::ProtoBuf.ProtoContract()]
         public partial class DiceRoll : global::ProtoBuf.IExtensible
         {
@@ -774,6 +801,87 @@ namespace SteamKit2.GC.Dota.Internal
             public bool ShouldSerializeparty_trivia_points() => __pbn__party_trivia_points != null;
             public void Resetparty_trivia_points() => __pbn__party_trivia_points = null;
             private uint? __pbn__party_trivia_points;
+
+        }
+
+        [global::ProtoBuf.ProtoContract()]
+        public partial class PlayerDraftPick : global::ProtoBuf.IExtensible
+        {
+            private global::ProtoBuf.IExtension __pbn__extensionData;
+            global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+                => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+            [global::ProtoBuf.ProtoMember(1)]
+            [global::System.ComponentModel.DefaultValue(-1)]
+            public int player_id
+            {
+                get => __pbn__player_id ?? -1;
+                set => __pbn__player_id = value;
+            }
+            public bool ShouldSerializeplayer_id() => __pbn__player_id != null;
+            public void Resetplayer_id() => __pbn__player_id = null;
+            private int? __pbn__player_id;
+
+            [global::ProtoBuf.ProtoMember(2)]
+            public int team
+            {
+                get => __pbn__team.GetValueOrDefault();
+                set => __pbn__team = value;
+            }
+            public bool ShouldSerializeteam() => __pbn__team != null;
+            public void Resetteam() => __pbn__team = null;
+            private int? __pbn__team;
+
+        }
+
+        [global::ProtoBuf.ProtoContract()]
+        public partial class ChatWheelMessage : global::ProtoBuf.IExtensible
+        {
+            private global::ProtoBuf.IExtension __pbn__extensionData;
+            global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+                => global::ProtoBuf.Extensible.GetExtensionObject(ref __pbn__extensionData, createIfMissing);
+
+            [global::ProtoBuf.ProtoMember(1)]
+            [global::System.ComponentModel.DefaultValue(4294967295u)]
+            public uint message_id
+            {
+                get => __pbn__message_id ?? 4294967295u;
+                set => __pbn__message_id = value;
+            }
+            public bool ShouldSerializemessage_id() => __pbn__message_id != null;
+            public void Resetmessage_id() => __pbn__message_id = null;
+            private uint? __pbn__message_id;
+
+            [global::ProtoBuf.ProtoMember(2)]
+            public uint emoticon_id
+            {
+                get => __pbn__emoticon_id.GetValueOrDefault();
+                set => __pbn__emoticon_id = value;
+            }
+            public bool ShouldSerializeemoticon_id() => __pbn__emoticon_id != null;
+            public void Resetemoticon_id() => __pbn__emoticon_id = null;
+            private uint? __pbn__emoticon_id;
+
+            [global::ProtoBuf.ProtoMember(3)]
+            [global::System.ComponentModel.DefaultValue("")]
+            public string message_text
+            {
+                get => __pbn__message_text ?? "";
+                set => __pbn__message_text = value;
+            }
+            public bool ShouldSerializemessage_text() => __pbn__message_text != null;
+            public void Resetmessage_text() => __pbn__message_text = null;
+            private string __pbn__message_text;
+
+            [global::ProtoBuf.ProtoMember(4)]
+            public uint hero_badge_tier
+            {
+                get => __pbn__hero_badge_tier.GetValueOrDefault();
+                set => __pbn__hero_badge_tier = value;
+            }
+            public bool ShouldSerializehero_badge_tier() => __pbn__hero_badge_tier != null;
+            public void Resethero_badge_tier() => __pbn__hero_badge_tier = null;
+            private uint? __pbn__hero_badge_tier;
 
         }
 

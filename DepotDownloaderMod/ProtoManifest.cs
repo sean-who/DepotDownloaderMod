@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using ProtoBuf;
 using SteamKit2;
-using static SteamKit2.Internal.CMsgClientUGSGetGlobalStatsResponse;
+using System.Security.Cryptography;
 
 namespace DepotDownloader
 {
@@ -14,7 +14,7 @@ namespace DepotDownloader
         // Proto ctor
         private ProtoManifest()
         {
-            Files = new List<FileData>();
+            Files = [];
         }
 
         public ProtoManifest(DepotManifest sourceManifest, ulong id) : this()
@@ -30,7 +30,7 @@ namespace DepotDownloader
             // Proto ctor
             private FileData()
             {
-                Chunks = new List<ChunkData>();
+                Chunks = [];
             }
 
             public FileData(DepotManifest.FileData sourceData) : this()
@@ -145,7 +145,7 @@ namespace DepotDownloader
                     {
                         fs.CopyTo(ms);
                     }
-                checksum = Util.SHAHash(ms.ToArray());
+                checksum = SHA1.HashData(ms.ToArray());
 
                 ms.Seek(0, SeekOrigin.Begin);
                 if (fromdepotdownloader)
@@ -166,7 +166,7 @@ namespace DepotDownloader
             {
                 Serializer.Serialize(ms, this);
 
-                checksum = Util.SHAHash(ms.ToArray());
+                checksum = SHA1.HashData(ms.ToArray());
 
                 ms.Seek(0, SeekOrigin.Begin);
 
