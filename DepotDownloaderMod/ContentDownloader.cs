@@ -594,8 +594,6 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
                 }
             }
 
-            
-
             byte[] depotKey = null;
             if (DepotKeyStore.ContainsKey(depotId))
             {
@@ -838,13 +836,15 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
                                 depot.ManifestId,
                                 connection,
                                 cdnPool.ProxyServer != null ? cdnPool.ProxyServer : "no proxy");
+
                             depotManifest = await cdnPool.CDNClient.DownloadManifestAsync(
                                 depot.DepotId,
                                 depot.ManifestId,
                                 manifestRequestCode,
                                 connection,
                                 depot.DepotKey,
-                                cdnPool.ProxyServer).ConfigureAwait(false);
+                                cdnPool.ProxyServer,
+                                GetCDNAuth(depot.AppId, depot.DepotId, connection.Host)).ConfigureAwait(false);
 
                             cdnPool.ReturnConnection(connection);
                         }
@@ -1250,7 +1250,6 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
             DebugLog.WriteLine("ContentDownloader", "CDN Auth empty.");
             cdnAuths.Add(new CDNAuth{app=app,depot=depot,host_name = host_name,noauth=true,});
             return null;
-
         }
 
         private static async Task DownloadSteam3AsyncDepotFileChunk(
