@@ -1384,6 +1384,7 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
 
             if (!DebugLog.Enabled)
             {
+                var origPosition = Console.GetCursorPosition();
                 var consoleH = Console.WindowTop + Console.WindowHeight - 1;
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.SetCursorPosition(0, consoleH);
@@ -1391,11 +1392,13 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
                 Console.SetCursorPosition(0, consoleH);
                 Console.Write("Total: {0,6:#00.00}% ({1})({2}/{3} Bytes)", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, Getspeed(sizeDownloaded), sizeDownloaded, depotDownloadCounter.CompleteDownloadSize);
                 Console.ForegroundColor = ConsoleColor.Gray;
+                Console.SetCursorPosition(origPosition.Left, origPosition.Top);
             }
         }
 
         private static Stopwatch speedStopwatch = new ();
         private static ulong lastDownloaded;
+        private static double lastspeed;
 
         private static string Getspeed(ulong sizeDownloaded)
         {
@@ -1404,11 +1407,15 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
                 speedStopwatch.Start();
                 return "N/A KB/s";
             }
+            if (speedStopwatch.ElapsedMilliseconds < 500)
+            {
+                return lastspeed + " KB/s";
+            }
             float speedbyte = ((sizeDownloaded - lastDownloaded) / ((float)speedStopwatch.ElapsedMilliseconds / 1000));
             var speedkb = Math.Round(speedbyte / 1000);
             lastDownloaded = sizeDownloaded;
-            speedStopwatch.Reset();
-            speedStopwatch.Start();
+            speedStopwatch.Restart();
+            lastspeed = speedkb;
             return speedkb + " KB/s";
         }
 
