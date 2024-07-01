@@ -1384,15 +1384,26 @@ var section_kv = appinfo.Children.Where(c => c.Name == section_key).FirstOrDefau
 
             if (!DebugLog.Enabled)
             {
-                var origPosition = Console.GetCursorPosition();
-                var consoleH = Console.WindowTop + Console.WindowHeight - 1;
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.SetCursorPosition(0, consoleH);
-                Console.Write(new String(' ', Console.BufferWidth));
-                Console.SetCursorPosition(0, consoleH);
-                Console.Write("Total: {0,6:#00.00}% ({1})({2}/{3} Bytes)", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, Getspeed(sizeDownloaded), sizeDownloaded, depotDownloadCounter.CompleteDownloadSize);
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.SetCursorPosition(origPosition.Left, origPosition.Top);
+                try
+                {
+                    var origPosition = Console.GetCursorPosition();
+                    var consoleH = Console.WindowTop + Console.WindowHeight - 1;
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.SetCursorPosition(0, consoleH);
+                    Console.Write(new String(' ', Console.BufferWidth));
+                    Console.SetCursorPosition(0, consoleH);
+                    Console.Write("Total: {0,6:#00.00}% ({1})({2}/{3} Bytes)",
+                        (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f,
+                        Getspeed(sizeDownloaded), sizeDownloaded, depotDownloadCounter.CompleteDownloadSize);
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.SetCursorPosition(origPosition.Left, origPosition.Top);
+                }
+                catch
+                {
+                    var fileFinalPath = Path.Combine(depot.InstallDir, file.FileName);
+                    Console.Write("{0,6:#00.00}% {1}\n\n", (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
+                }
+                
             }
         }
 
