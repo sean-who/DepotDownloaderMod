@@ -738,7 +738,7 @@ namespace DepotDownloader
             if (Config.UseManifestFile)
             {
                 lastManifestId = depot.ManifestId;
-                oldProtoManifest = ProtoManifest.LoadFromFile(Config.ManifestFile, out _);
+                oldProtoManifest = new ProtoManifest(DepotManifest.LoadFromFile(Config.ManifestFile), 0);
             }
 
             if (lastManifestId == depot.ManifestId && oldProtoManifest != null)
