@@ -30,6 +30,11 @@ static class Ansi
         {
             return;
         }
+        
+        if (OperatingSystem.IsLinux())
+        {
+            return;
+        }
 
         var (supportsAnsi, legacyConsole) = AnsiDetector.Detect(stdError: false, upgrade: true);
 
