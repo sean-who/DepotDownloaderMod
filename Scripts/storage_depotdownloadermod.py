@@ -408,7 +408,7 @@ async def main(app_id: str, repos: list) -> bool:
         if selected_repo == 'luckygametools/steam-cfg': 
             url = f'https://api.github.com/repos/{selected_repo}/contents/steamdb2/{app_id}'
             r_json = await fetch_info(url, headers)
-            if (r_json) and ('sha' in r_json[0]):
+            if (r_json) and (isinstance(r_json, list)):
                 path = [item['path'] for item in r_json if item['name'] == '00000encrypt.dat'][0]
                 manifests = await get_data(app_id, path, selected_repo)
                 await depotdownloadermod_add(app_id, manifests)
