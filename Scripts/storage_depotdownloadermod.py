@@ -13,9 +13,13 @@ import ujson as json
 import vdf
 import base64
 import zlib
+import pygob
+import collections
 from typing import Any
 from pathlib import Path
 from colorama import init, Fore, Back, Style
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
 
 init()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -25,8 +29,6 @@ client = httpx.AsyncClient(trust_env=True)
 
 DEPOTDOWNLOADER = "DepotDownloadermod.exe"
 DEPOTDOWNLOADER_ARGS = "-max-servers 128 -max-downloads 256 -verify-all"
-
-Pro = False
 
 DEFAULT_CONFIG = {
     "Github_Personal_Token": "",
@@ -78,15 +80,13 @@ def init():
         log.info(line)
 
     log.info('DepotDownloadermod下载脚本一键生成工具')
-    log.info('作者: ikun0014 修改: oureveryday')
+    log.info('原作者: ikun0014 修改: oureveryday')
     log.warning('本项目采用GNU General Public License v3开源许可证, 请勿用于商业用途')
-    log.info('版本: 1.3.5')
     log.info(
-        '项目Github仓库: https://github.com/ikunshare/Onekey \n Gitee: https://gitee.com/ikun0014/Onekey'
+        '项目Github仓库: https://github.com/oureveryday/DepotDownloaderMod'
     )
-    log.info('官网: ikunshare.com')
     log.warning(
-        '本项目完全开源免费, 如果你在淘宝, QQ群内通过购买方式获得, 赶紧回去骂商家死全家\n   交流群组:\n    https://t.me/ikunshare_qun'
+        '本项目完全开源免费, 如果你在淘宝, QQ群内通过购买方式获得, 赶紧回去骂商家死全家\n   交流群组:\n    https://discord.gg/BZQtrBSUnd'
     )
     log.info('App ID可以在SteamDB, SteamUI或Steam商店链接页面查看')
 
@@ -220,10 +220,7 @@ async def get(sha: str, path: str, repo: str):
             try:
                 r = await client.get(url, timeout=30)
                 if r.status_code == 200:
-                    if Pro:
-                        return csharp_gzip(r.text)
-                    else:
-                        return r.read()
+                    return r.read()
                 else:
                     log.error(f'获取失败: {path} - 状态码: {r.status_code}')
             except KeyboardInterrupt:
@@ -238,7 +235,6 @@ async def get(sha: str, path: str, repo: str):
 
     log.error(f'超过最大重试次数: {path}')
     raise Exception(f'无法下载: {path}')
-
 
 async def get_manifest(app_id: str, sha: str, path: str, repo: str) -> list:
     collected_depots = []
@@ -267,6 +263,34 @@ async def get_manifest(app_id: str, sha: str, path: str, repo: str) -> list:
         log.error(f'处理失败: {path} - {stack_error(e)}')
         raise
     return collected_depots
+
+async def get_data(app_id: str, path: str, repo: str) -> list:
+    AppInfo = collections.namedtuple('AppInfo', ['Appid','Licenses', 'App', 'Depots', 'EncryptedAppTicket', 'AppOwnershipTicket'])
+    collected_depots = []
+    depot_cache_path = Path(os.getcwd())
+    try:
+        content = await get('main', path, repo)
+        content_dec = await symmetric_decrypt(b" s  t  e  a  m  ", content)
+        content_dec = await xor_decrypt(b"hail",content_dec)
+        content_gob = pygob.load_all(bytes(content_dec))
+        app_info = AppInfo._make(*content_gob)
+        for depot in app_info.Depots:
+            filename = f"{depot.Id}_{depot.Manifests.Id}.manifest"
+            save_path = depot_cache_path / filename
+            if save_path.exists():
+                log.warning(f'已存在清单: {save_path}')
+            else:
+                async with aiofiles.open(save_path, 'wb') as f:
+                    await f.write(depot.Manifests.Data)
+            async with aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8") as f:
+                    await f.write(f'{depot.Id};{depot.Decryptkey.hex()}\n')
+            collected_depots.append(filename)
+    except KeyboardInterrupt:
+        log.info("程序已退出")
+    except Exception as e:
+        log.error(f'处理失败: {path} - {stack_error(e)}')
+        raise
+    return collected_depots
     
 async def depotdownloadermod_add(app_id: str, manifests: list) -> bool:
     async with lock:
@@ -281,7 +305,7 @@ async def depotdownloadermod_add(app_id: str, manifests: list) -> bool:
             log.error(f'出现错误: {e}')
             return False
 
-async def fetch_branch_info(url, headers) -> str | None:
+async def fetch_info(url, headers) -> str | None:
     try:
         r = await client.get(url, headers=headers)
         return r.json()
@@ -306,13 +330,59 @@ async def get_pro_token():
     except httpx.ConnectTimeout as e:
         log.error(f'获取信息时超时: {stack_error(e)}')
         return None
+    
+async def symmetric_decrypt(key, ciphertext):
+    """
+    使用AES解密数据
+    key: AES密钥字节串
+    ciphertext: 待解密的字节串,包含IV
+    """
+    try:
+    # 分离IV和加密数据
+        iv = ciphertext[:AES.block_size]
+        data = ciphertext[AES.block_size:]
+        
+        # 使用ECB模式解密IV
+        cipher_ecb = AES.new(key, AES.MODE_ECB)
+        iv = cipher_ecb.decrypt(iv)
+        
+        # 使用CBC模式和解密后的IV解密数据
+        cipher_cbc = AES.new(key, AES.MODE_CBC, iv)
+        decrypted = cipher_cbc.decrypt(data)
+        
+        # 去除PKCS7填充
+        return unpad(decrypted, AES.block_size)
+    except Exception as e:
+        log.error(f'解密失败: {stack_error(e)}')
+        return None
+
+async def xor_decrypt(key, ciphertext):
+    """
+    使用异或解密数据
+    key: 异或密钥字节串
+    ciphertext: 待解密的字节串
+    """
+    try:
+        decrypted = bytearray(len(ciphertext))
+        for i in range(len(ciphertext)):
+            decrypted[i] = ciphertext[i] ^ key[i % len(key)]
+        return bytes(decrypted)
+    except Exception as e:
+        log.error(f'解密失败: {stack_error(e)}')
+        return None
 
 async def get_latest_repo_info(repos: list, app_id: str, headers) -> Any | None:
+    if len(repos) == 1:
+        return repos[0], None
+        
     latest_date = None
     selected_repo = None
     for repo in repos:
+        if repo == "luckygametools/steam-cfg":
+            continue
+            
         url = f'https://api.github.com/repos/{repo}/branches/{app_id}'
-        r_json = await fetch_branch_info(url, headers)
+        r_json = await fetch_info(url, headers)
         if r_json and 'commit' in r_json:
             date = r_json['commit']['commit']['author']['date']
             if (latest_date is None) or (date > latest_date):
@@ -329,28 +399,18 @@ async def main(app_id: str, repos: list) -> bool:
         return False
     app_id = app_id_list[0]
     github_token = config.get("Github_Personal_Token", "")
-    if repos.__len__() == 1 and repos[0] == 'P-ToyStore/SteamManifestCache_Pro':
-        github_token = get_pro_token()
-        global Pro
-        Pro = True
-        headers = {'User-Agent':'SteamDepotDownload','Authorization': f'Bearer {github_token}'}
-    else:
-        headers = {'Authorization': f'Bearer {github_token}'} if github_token else None
+    headers = {'Authorization': f'Bearer {github_token}'} if github_token else None
     await checkcn()
     await check_github_api_rate_limit(headers)
     selected_repo, latest_date = await get_latest_repo_info(repos, app_id, headers)
     if (selected_repo):
         log.info(f'选择清单仓库: {selected_repo}')
-        url = f'https://api.github.com/repos/{selected_repo}/branches/{app_id}'
-        r_json = await fetch_branch_info(url, headers)
-        if (r_json) and ('commit' in r_json):
-            sha = r_json['commit']['sha']
-            url = r_json['commit']['commit']['tree']['url']
-            r2_json = await fetch_branch_info(url, headers)
-            if (r2_json) and ('tree' in r2_json):
-                manifests = [item['path'] for item in r2_json['tree'] if item['path'].endswith('.manifest')]
-                for item in r2_json['tree']:
-                    await get_manifest(app_id, sha, item['path'], selected_repo)
+        if selected_repo == 'luckygametools/steam-cfg': 
+            url = f'https://api.github.com/repos/{selected_repo}/contents/steamdb2/{app_id}'
+            r_json = await fetch_info(url, headers)
+            if (r_json) and ('sha' in r_json[0]):
+                path = [item['path'] for item in r_json if item['name'] == '00000encrypt.dat'][0]
+                manifests = await get_data(app_id, path, selected_repo)
                 await depotdownloadermod_add(app_id, manifests)
                 log.info('已添加下载文件')
                 log.info(f'清单最后更新时间: {latest_date}')
@@ -358,6 +418,26 @@ async def main(app_id: str, repos: list) -> bool:
                 await client.aclose()
                 os.system('pause')
                 return True
+        else:
+            url = f'https://api.github.com/repos/{selected_repo}/branches/{app_id}'
+            r_json = await fetch_info(url, headers)
+            if (r_json) and ('commit' in r_json):
+                sha = r_json['commit']['sha']
+                url = r_json['commit']['commit']['tree']['url']
+                r2_json = await fetch_info(url, headers)
+                if (r2_json) and ('tree' in r2_json):
+                    manifests = [item['path'] for item in r2_json['tree'] if item['path'].endswith('.manifest')]
+                    for item in r2_json['tree']:
+                        await get_manifest(app_id, sha, item['path'], selected_repo)
+                    await depotdownloadermod_add(app_id, manifests)
+                    log.info('已添加下载文件')
+                    log.info(f'清单最后更新时间: {latest_date}')
+                    log.info(f'导入成功: {app_id}')
+                    await client.aclose()
+                    os.system('pause')
+                    return True
+            
+        
     log.error(f'清单下载或生成失败: {app_id}')
     await client.aclose()
     os.system('pause')
@@ -390,10 +470,11 @@ if __name__ == '__main__':
             'Auiowu/ManifestAutoUpdate',
             'tymolu233/ManifestAutoUpdate',
 #            'P-ToyStore/SteamManifestCache_Pro'
+            'luckygametools/steam-cfg'
         ]
         app_id = input(f"{Fore.CYAN}{Back.BLACK}{Style.BRIGHT}请输入游戏AppID: {Style.RESET_ALL}").strip()
         selected_repos = select_repo(repos)
-        asyncio.run(main(app_id, repos))
+        asyncio.run(main(app_id, selected_repos))
     except KeyboardInterrupt:
         log.info("程序已退出")
     except SystemExit:
