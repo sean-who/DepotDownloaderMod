@@ -274,7 +274,7 @@ async def get_data(app_id: str, path: str, repo: str) -> list:
         content_dec = await xor_decrypt(b"hail",content_dec)
         content_gob = pygob.load_all(bytes(content_dec))
         app_info = AppInfo._make(*content_gob)
-        keyfile = aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
+        keyfile = await aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
         for depot in app_info.Depots:
             filename = f"{depot.Id}_{depot.Manifests.Id}.manifest"
             save_path = depot_cache_path / filename
