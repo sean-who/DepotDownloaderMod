@@ -1,14 +1,13 @@
 import sys
 import os
+import re
 import traceback
 import time
 import logging
-import subprocess
 import asyncio
 import aiofiles
 import colorlog
 import httpx
-import winreg
 import ujson as json
 import vdf
 import base64
@@ -285,6 +284,46 @@ async def get_data(app_id: str, path: str, repo: str) -> list:
                     await f.write(depot.Manifests.Data)
             await keyfile.write(f'{depot.Id};{depot.Decryptkey.hex()}\n')
             collected_depots.append(filename)
+        keyfile.close()
+    except KeyboardInterrupt:
+        log.info("程序已退出")
+    except Exception as e:
+        log.error(f'处理失败: {path} - {stack_error(e)}')
+        raise
+    return collected_depots
+
+async def get_data_local(app_id: str, path: str, repo: str) -> list:
+    collected_depots = []
+    depot_cache_path = Path(os.getcwd())
+    try:
+        luafile = await aiofiles.open(depot_cache_path / f"{app_id}.lua", 'r', encoding="utf-8")
+        content = await luafile.read()
+        await luafile.close()
+
+        keyfile = await aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
+        # 解析 addappid 和 setManifestid
+        addappid_pattern = re.compile(r'addappid\((\d+)(?:,0,"([0-9a-f]+)")?\)')
+        setmanifestid_pattern = re.compile(r'setManifestid\((\d+),"(\d+)"\)')
+
+        for match in addappid_pattern.finditer(content):
+            depot_id = match.group(1)
+            decrypt_key = match.group(2) if match.group(2) else None
+            if decrypt_key:
+                log.info(f'解析到 addappid: depot_id={depot_id}, decrypt_key={decrypt_key}')
+                await keyfile.write(f'{depot_id};{decrypt_key}\n')
+
+        for match in setmanifestid_pattern.finditer(content):
+            depot_id = match.group(1)
+            manifest_id = match.group(2)
+            filename = f"{depot_id}_{manifest_id}.manifest"
+            save_path = depot_cache_path / filename
+            log.info(f'解析到 setManifestid: depot_id={depot_id}, manifest_id={manifest_id}')
+            if save_path.exists():
+                log.info(f'存在清单: {save_path}')
+                collected_depots.append(filename)
+            else:
+                log.info(f'未找到清单: {save_path}')
+            
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -378,7 +417,7 @@ async def get_latest_repo_info(repos: list, app_id: str, headers) -> Any | None:
     latest_date = None
     selected_repo = None
     for repo in repos:
-        if repo == "luckygametools/steam-cfg":
+        if repo == "luckygametools/steam-cfg" or repo == "Steam tools Lua script (Local file)":
             continue
             
         url = f'https://api.github.com/repos/{repo}/branches/{app_id}'
@@ -405,7 +444,16 @@ async def main(app_id: str, repos: list) -> bool:
     selected_repo, latest_date = await get_latest_repo_info(repos, app_id, headers)
     if (selected_repo):
         log.info(f'选择清单仓库: {selected_repo}')
-        if selected_repo == 'luckygametools/steam-cfg': 
+        if selected_repo == 'Steam tools Lua script (Local file)':
+            manifests = await get_data_local(app_id, path, selected_repo)
+            await depotdownloadermod_add(app_id, manifests)
+            log.info('已添加下载文件')
+            log.info(f'清单最后更新时间: {latest_date}')
+            log.info(f'导入成功: {app_id}')
+            await client.aclose()
+            os.system('pause')
+            return True
+        elif selected_repo == 'luckygametools/steam-cfg': 
             url = f'https://api.github.com/repos/{selected_repo}/contents/steamdb2/{app_id}'
             r_json = await fetch_info(url, headers)
             if (r_json) and (isinstance(r_json, list)):
@@ -470,7 +518,8 @@ if __name__ == '__main__':
             'Auiowu/ManifestAutoUpdate',
             'tymolu233/ManifestAutoUpdate',
 #            'P-ToyStore/SteamManifestCache_Pro'
-            'luckygametools/steam-cfg'
+            'luckygametools/steam-cfg',
+            'Steam tools Lua script (Local file)'
         ]
         app_id = input(f"{Fore.CYAN}{Back.BLACK}{Style.BRIGHT}请输入游戏AppID: {Style.RESET_ALL}").strip()
         selected_repos = select_repo(repos)
