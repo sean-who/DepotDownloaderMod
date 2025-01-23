@@ -12,6 +12,7 @@ import ujson as json
 import vdf
 import base64
 import zlib
+import struct
 import pygob
 import collections
 from typing import Any
@@ -292,13 +293,37 @@ async def get_data(app_id: str, path: str, repo: str) -> list:
         raise
     return collected_depots
 
-async def get_data_local(app_id: str, path: str, repo: str) -> list:
+async def get_data_local(app_id: str) -> list:
     collected_depots = []
     depot_cache_path = Path(os.getcwd())
     try:
-        luafile = await aiofiles.open(depot_cache_path / f"{app_id}.lua", 'r', encoding="utf-8")
-        content = await luafile.read()
-        await luafile.close()
+        lua_file_path = depot_cache_path / f"{app_id}.lua"
+        st_file_path = depot_cache_path / f"{app_id}.st"
+        if not lua_file_path.exists() and not st_file_path.exists():
+            log.error(f'未找到lua文件: {lua_file_path} 或 st文件: {st_file_path}')
+            raise FileNotFoundError
+        if lua_file_path.exists():
+            luafile = await aiofiles.open(lua_file_path, 'r', encoding="utf-8")
+            content = await luafile.read()
+            await luafile.close()
+
+        if st_file_path.exists():
+            stfile = await aiofiles.open(st_file_path, 'rb')
+            content = await stfile.read()
+            await stfile.close()
+            # 解析 header
+            header = content[:12]
+            xorkey, size, xorkeyverify = struct.unpack('III', header)
+            xorkey ^= 0xFFFEA4C8
+            xorkey = xorkey & 0xFF
+            # 解析 data
+            data = bytearray(content[12:12+size])
+            for i in range(len(data)):
+                data[i] = data[i] ^ xorkey
+            # 读取 data
+            decompressed_data = zlib.decompress(data)
+            content = decompressed_data[512:].decode('utf-8')
+            
 
         keyfile = await aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
         # 解析 addappid 和 setManifestid
@@ -327,7 +352,7 @@ async def get_data_local(app_id: str, path: str, repo: str) -> list:
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
-        log.error(f'处理失败: {path} - {stack_error(e)}')
+        log.error(f'处理失败: {stack_error(e)}')
         raise
     return collected_depots
     
@@ -445,7 +470,7 @@ async def main(app_id: str, repos: list) -> bool:
     if (selected_repo):
         log.info(f'选择清单仓库: {selected_repo}')
         if selected_repo == 'Steam tools Lua script (Local file)':
-            manifests = await get_data_local(app_id, path, selected_repo)
+            manifests = await get_data_local(app_id)
             await depotdownloadermod_add(app_id, manifests)
             log.info('已添加下载文件')
             log.info(f'清单最后更新时间: {latest_date}')
