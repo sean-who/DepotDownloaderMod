@@ -315,7 +315,7 @@ async def get_data_local(app_id: str) -> list:
             header = content[:12]
             xorkey, size, xorkeyverify = struct.unpack('III', header)
             xorkey ^= 0xFFFEA4C8
-            xorkey = xorkey & 0xFF
+            xorkey &= 0xFF
             # 解析 data
             data = bytearray(content[12:12+size])
             for i in range(len(data)):
@@ -327,8 +327,8 @@ async def get_data_local(app_id: str) -> list:
 
         keyfile = await aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
         # 解析 addappid 和 setManifestid
-        addappid_pattern = re.compile(r'addappid\((\d+)(?:,0,"([0-9a-f]+)")?\)')
-        setmanifestid_pattern = re.compile(r'setManifestid\((\d+),"(\d+)"\)')
+        addappid_pattern = re.compile(r'addappid\((\d+)(?:,\d+,"([0-9a-f]+)")?\)')
+        setmanifestid_pattern = re.compile(r'setManifestid\((\d+),"(\d+)"(?:,\s*\d+)?\)')
 
         for match in addappid_pattern.finditer(content):
             depot_id = match.group(1)
