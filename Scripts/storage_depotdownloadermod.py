@@ -327,8 +327,8 @@ async def get_data_local(app_id: str) -> list:
 
         keyfile = await aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8")
         # 解析 addappid 和 setManifestid
-        addappid_pattern = re.compile(r'addappid\((\d+)(?:,\d+,"([0-9a-f]+)")?\)')
-        setmanifestid_pattern = re.compile(r'setManifestid\((\d+),"(\d+)"(?:,\s*\d+)?\)')
+        addappid_pattern = re.compile(r'addappid\(\s*(\d+)\s*(?:,\s*\d+\s*,\s*"([0-9a-f]+)"\s*)?\)')
+        setmanifestid_pattern = re.compile(r'setManifestid\(\s*(\d+)\s*,\s*"(\d+)"\s*(?:,\s*\d+\s*)?\)')
 
         for match in addappid_pattern.finditer(content):
             depot_id = match.group(1)
