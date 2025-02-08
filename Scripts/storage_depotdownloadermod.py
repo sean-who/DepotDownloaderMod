@@ -285,7 +285,7 @@ async def get_data(app_id: str, path: str, repo: str) -> list:
                     await f.write(depot.Manifests.Data)
             await keyfile.write(f'{depot.Id};{depot.Decryptkey.hex()}\n')
             collected_depots.append(filename)
-        keyfile.close()
+        await keyfile.close()
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
