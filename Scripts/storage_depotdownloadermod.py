@@ -355,7 +355,7 @@ async def get_data_local(app_id: str) -> list:
         log.error(f'处理失败: {stack_error(e)}')
         raise
     return collected_depots
-    
+
 async def depotdownloadermod_add(app_id: str, manifests: list) -> bool:
     async with lock:
         log.info(f'DepotDownloader 下载文件生成: {app_id}.bat')
@@ -442,7 +442,7 @@ async def get_latest_repo_info(repos: list, app_id: str, headers) -> Any | None:
     latest_date = None
     selected_repo = None
     for repo in repos:
-        if repo == "luckygametools/steam-cfg" or repo == "Steam tools Lua script (Local file)":
+        if repo == "luckygametools/steam-cfg" or repo == "Steam tools .lua/.st script (Local file)":
             continue
             
         url = f'https://api.github.com/repos/{repo}/branches/{app_id}'
@@ -455,6 +455,98 @@ async def get_latest_repo_info(repos: list, app_id: str, headers) -> Any | None:
 
     return selected_repo, latest_date
 
+async def printedwaste_download(app_id: str) -> bool:
+    url = f"https://api.printedwaste.com/gfk/download/{app_id}"
+    headers = {
+        "Authorization": "Bearer dGhpc19pcyBhX3JhbmRvbV90b2tlbg=="
+    }
+    depot_cache_path = Path(os.getcwd())
+    try:
+        r = await client.get(url, headers=headers, timeout=60)
+        r.raise_for_status()
+        content = await r.aread()  # 异步读取全部内容
+        
+        import io, zipfile
+        zip_mem = io.BytesIO(content)
+        with zipfile.ZipFile(zip_mem) as zf:
+            for file in zf.namelist():
+                if file.endswith(('.st', '.lua', '.manifest')):
+                    file_content = zf.read(file)
+                    log.info(f"解压文件: {file}，大小: {len(file_content)} 字节")    
+                    async with aiofiles.open(depot_cache_path / Path(file).name, 'wb') as f:
+                        await f.write(file_content)        
+        return True
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            log.error("未找到清单")
+        else:
+            log.error(f'处理失败: {stack_error(e)}')
+        raise
+    except KeyboardInterrupt:
+        log.info("程序已退出")
+    except Exception as e:
+        log.error(f'处理失败: {stack_error(e)}')
+        raise
+
+async def gdata_download(app_id: str) -> bool:
+    url = f"https://steambox.gdata.fun/cnhz/qingdan/{app_id}.zip"
+    depot_cache_path = Path(os.getcwd())
+    try:
+        r = await client.get(url, timeout=60)
+        r.raise_for_status()
+        content = await r.aread()  # 异步读取全部内容
+        
+        import io, zipfile
+        zip_mem = io.BytesIO(content)
+        with zipfile.ZipFile(zip_mem) as zf:
+            for file in zf.namelist():
+                if file.endswith(('.st', '.lua', '.manifest')):
+                    file_content = zf.read(file)
+                    log.info(f"解压文件: {file}，大小: {len(file_content)} 字节")    
+                    async with aiofiles.open(depot_cache_path / Path(file).name, 'wb') as f:
+                        await f.write(file_content)        
+        return True
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            log.error("未找到清单")
+        else:
+            log.error(f'处理失败: {stack_error(e)}')
+        raise
+    except KeyboardInterrupt:
+        log.info("程序已退出")
+    except Exception as e:
+        log.error(f'处理失败: {stack_error(e)}')
+        raise
+
+async def cysaw_download(app_id: str) -> bool:
+    url = f"https://cysaw.top/uploads/{app_id}.zip"
+    depot_cache_path = Path(os.getcwd())
+    try:
+        r = await client.get(url, timeout=60)
+        r.raise_for_status()
+        content = await r.aread()  # 异步读取全部内容
+        
+        import io, zipfile
+        zip_mem = io.BytesIO(content)
+        with zipfile.ZipFile(zip_mem) as zf:
+            for file in zf.namelist():
+                if file.endswith(('.st', '.lua', '.manifest')):
+                    file_content = zf.read(file)
+                    log.info(f"解压文件: {file}，大小: {len(file_content)} 字节")    
+                    async with aiofiles.open(depot_cache_path / Path(file).name, 'wb') as f:
+                        await f.write(file_content)        
+        return True
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            log.error("未找到清单")
+        else:
+            log.error(f'处理失败: {stack_error(e)}')
+        raise
+    except KeyboardInterrupt:
+        log.info("程序已退出")
+    except Exception as e:
+        log.error(f'处理失败: {stack_error(e)}')
+        raise
 
 async def main(app_id: str, repos: list) -> bool:
     app_id_list = list(filter(str.isdecimal, app_id.strip().split('-')))
@@ -464,53 +556,84 @@ async def main(app_id: str, repos: list) -> bool:
     app_id = app_id_list[0]
     github_token = config.get("Github_Personal_Token", "")
     headers = {'Authorization': f'Bearer {github_token}'} if github_token else None
-    await checkcn()
-    await check_github_api_rate_limit(headers)
-    selected_repo, latest_date = await get_latest_repo_info(repos, app_id, headers)
-    if (selected_repo):
-        log.info(f'选择清单仓库: {selected_repo}')
-        if selected_repo == 'Steam tools Lua script (Local file)':
-            manifests = await get_data_local(app_id)
-            await depotdownloadermod_add(app_id, manifests)
-            log.info('已添加下载文件')
-            log.info(f'清单最后更新时间: {latest_date}')
-            log.info(f'导入成功: {app_id}')
-            await client.aclose()
-            os.system('pause')
-            return True
-        elif selected_repo == 'luckygametools/steam-cfg': 
-            url = f'https://api.github.com/repos/{selected_repo}/contents/steamdb2/{app_id}'
-            r_json = await fetch_info(url, headers)
-            if (r_json) and (isinstance(r_json, list)):
-                path = [item['path'] for item in r_json if item['name'] == '00000encrypt.dat'][0]
-                manifests = await get_data(app_id, path, selected_repo)
+    # selected_repo, latest_date = await get_latest_repo_info(repos, app_id, headers)
+    for selected_repo in repos:
+        if (selected_repo):
+            log.info(f'选择清单仓库: {selected_repo}')
+            if selected_repo == 'Steam tools .lua/.st script (Local file)':
+                manifests = await get_data_local(app_id)
                 await depotdownloadermod_add(app_id, manifests)
                 log.info('已添加下载文件')
-                log.info(f'清单最后更新时间: {latest_date}')
+                # log.info(f'清单最后更新时间: {latest_date}')
                 log.info(f'导入成功: {app_id}')
                 await client.aclose()
                 os.system('pause')
                 return True
-        else:
-            url = f'https://api.github.com/repos/{selected_repo}/branches/{app_id}'
-            r_json = await fetch_info(url, headers)
-            if (r_json) and ('commit' in r_json):
-                sha = r_json['commit']['sha']
-                url = r_json['commit']['commit']['tree']['url']
-                r2_json = await fetch_info(url, headers)
-                if (r2_json) and ('tree' in r2_json):
-                    manifests = [item['path'] for item in r2_json['tree'] if item['path'].endswith('.manifest')]
-                    for item in r2_json['tree']:
-                        await get_manifest(app_id, sha, item['path'], selected_repo)
+            elif selected_repo == 'PrintedWaste':
+                await printedwaste_download(app_id)
+                manifests = await get_data_local(app_id)
+                await depotdownloadermod_add(app_id, manifests)
+                log.info('已添加下载文件')
+                # log.info(f'清单最后更新时间: {latest_date}')
+                log.info(f'导入成功: {app_id}')
+                await client.aclose()
+                os.system('pause')
+                return True
+            elif selected_repo == 'steambox.gdata.fun':
+                await gdata_download(app_id)
+                manifests = await get_data_local(app_id)
+                await depotdownloadermod_add(app_id, manifests)
+                log.info('已添加下载文件')
+                # log.info(f'清单最后更新时间: {latest_date}')
+                log.info(f'导入成功: {app_id}')
+                await client.aclose()
+                os.system('pause')
+                return True
+            elif selected_repo == 'cysaw.top':
+                await cysaw_download(app_id)
+                manifests = await get_data_local(app_id)
+                await depotdownloadermod_add(app_id, manifests)
+                log.info('已添加下载文件')
+                # log.info(f'清单最后更新时间: {latest_date}')
+                log.info(f'导入成功: {app_id}')
+                await client.aclose()
+                os.system('pause')
+                return True
+            elif selected_repo == 'luckygametools/steam-cfg': 
+                await checkcn()
+                await check_github_api_rate_limit(headers)
+                url = f'https://api.github.com/repos/{selected_repo}/contents/steamdb2/{app_id}'
+                r_json = await fetch_info(url, headers)
+                if (r_json) and (isinstance(r_json, list)):
+                    path = [item['path'] for item in r_json if item['name'] == '00000encrypt.dat'][0]
+                    manifests = await get_data(app_id, path, selected_repo)
                     await depotdownloadermod_add(app_id, manifests)
                     log.info('已添加下载文件')
-                    log.info(f'清单最后更新时间: {latest_date}')
+                    # log.info(f'清单最后更新时间: {latest_date}')
                     log.info(f'导入成功: {app_id}')
                     await client.aclose()
                     os.system('pause')
                     return True
-            
-        
+            else:
+                await checkcn()
+                await check_github_api_rate_limit(headers)
+                url = f'https://api.github.com/repos/{selected_repo}/branches/{app_id}'
+                r_json = await fetch_info(url, headers)
+                if (r_json) and ('commit' in r_json):
+                    sha = r_json['commit']['sha']
+                    url = r_json['commit']['commit']['tree']['url']
+                    r2_json = await fetch_info(url, headers)
+                    if (r2_json) and ('tree' in r2_json):
+                        manifests = [item['path'] for item in r2_json['tree'] if item['path'].endswith('.manifest')]
+                        for item in r2_json['tree']:
+                            await get_manifest(app_id, sha, item['path'], selected_repo)
+                        await depotdownloadermod_add(app_id, manifests)
+                        log.info('已添加下载文件')
+                        # log.info(f'清单最后更新时间: {latest_date}')
+                        log.info(f'导入成功: {app_id}')
+                        await client.aclose()
+                        os.system('pause')
+                        return True
     log.error(f'清单下载或生成失败: {app_id}')
     await client.aclose()
     os.system('pause')
@@ -542,9 +665,12 @@ if __name__ == '__main__':
             'ikun0014/ManifestHub',
             'Auiowu/ManifestAutoUpdate',
             'tymolu233/ManifestAutoUpdate',
+            'PrintedWaste',
+            'steambox.gdata.fun',
+            'cysaw.top',
 #            'P-ToyStore/SteamManifestCache_Pro'
             'luckygametools/steam-cfg',
-            'Steam tools Lua script (Local file)'
+            'Steam tools .lua/.st script (Local file)'
         ]
         app_id = input(f"{Fore.CYAN}{Back.BLACK}{Style.BRIGHT}请输入游戏AppID: {Style.RESET_ALL}").strip()
         selected_repos = select_repo(repos)
