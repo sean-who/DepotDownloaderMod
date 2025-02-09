@@ -285,7 +285,7 @@ async def get_data(app_id: str, path: str, repo: str) -> list:
                     await f.write(depot.Manifests.Data)
             await keyfile.write(f'{depot.Id};{depot.Decryptkey.hex()}\n')
             collected_depots.append(filename)
-        await keyfile.close()
+        keyfile.close()
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -479,9 +479,10 @@ async def printedwaste_download(app_id: str) -> bool:
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             log.error("未找到清单")
+            return False
         else:
             log.error(f'处理失败: {stack_error(e)}')
-        raise
+            raise
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -509,9 +510,10 @@ async def gdata_download(app_id: str) -> bool:
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             log.error("未找到清单")
+            return False
         else:
             log.error(f'处理失败: {stack_error(e)}')
-        raise
+            raise
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -539,9 +541,10 @@ async def cysaw_download(app_id: str) -> bool:
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             log.error("未找到清单")
+            return False
         else:
             log.error(f'处理失败: {stack_error(e)}')
-        raise
+            raise
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -570,35 +573,35 @@ async def main(app_id: str, repos: list) -> bool:
                 os.system('pause')
                 return True
             elif selected_repo == 'PrintedWaste':
-                await printedwaste_download(app_id)
-                manifests = await get_data_local(app_id)
-                await depotdownloadermod_add(app_id, manifests)
-                log.info('已添加下载文件')
-                # log.info(f'清单最后更新时间: {latest_date}')
-                log.info(f'导入成功: {app_id}')
-                await client.aclose()
-                os.system('pause')
-                return True
+                if(await printedwaste_download(app_id)):
+                    manifests = await get_data_local(app_id)
+                    await depotdownloadermod_add(app_id, manifests)
+                    log.info('已添加下载文件')
+                    # log.info(f'清单最后更新时间: {latest_date}')
+                    log.info(f'导入成功: {app_id}')
+                    await client.aclose()
+                    os.system('pause')
+                    return True
             elif selected_repo == 'steambox.gdata.fun':
-                await gdata_download(app_id)
-                manifests = await get_data_local(app_id)
-                await depotdownloadermod_add(app_id, manifests)
-                log.info('已添加下载文件')
-                # log.info(f'清单最后更新时间: {latest_date}')
-                log.info(f'导入成功: {app_id}')
-                await client.aclose()
-                os.system('pause')
-                return True
+                if(await gdata_download(app_id)):
+                    manifests = await get_data_local(app_id)
+                    await depotdownloadermod_add(app_id, manifests)
+                    log.info('已添加下载文件')
+                    # log.info(f'清单最后更新时间: {latest_date}')
+                    log.info(f'导入成功: {app_id}')
+                    await client.aclose()
+                    os.system('pause')
+                    return True
             elif selected_repo == 'cysaw.top':
-                await cysaw_download(app_id)
-                manifests = await get_data_local(app_id)
-                await depotdownloadermod_add(app_id, manifests)
-                log.info('已添加下载文件')
-                # log.info(f'清单最后更新时间: {latest_date}')
-                log.info(f'导入成功: {app_id}')
-                await client.aclose()
-                os.system('pause')
-                return True
+                if(await cysaw_download(app_id)):
+                    manifests = await get_data_local(app_id)
+                    await depotdownloadermod_add(app_id, manifests)
+                    log.info('已添加下载文件')
+                    # log.info(f'清单最后更新时间: {latest_date}')
+                    log.info(f'导入成功: {app_id}')
+                    await client.aclose()
+                    os.system('pause')
+                    return True
             elif selected_repo == 'luckygametools/steam-cfg': 
                 await checkcn()
                 await check_github_api_rate_limit(headers)
@@ -634,6 +637,7 @@ async def main(app_id: str, repos: list) -> bool:
                         await client.aclose()
                         os.system('pause')
                         return True
+        log.error(f'未找到清单: {app_id}')
     log.error(f'清单下载或生成失败: {app_id}')
     await client.aclose()
     os.system('pause')
