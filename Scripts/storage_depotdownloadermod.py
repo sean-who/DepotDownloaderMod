@@ -256,7 +256,11 @@ async def get_manifest(app_id: str, sha: str, path: str, repo: str) -> list:
             if depots_config:
                 async with aiofiles.open(depot_cache_path / f"{app_id}.key", 'w', encoding="utf-8") as f:
                     for depot_id, depot_info in depots_config['depots'].items():
-                        await f.write(f'{depot_id};{depot_info["DecryptionKey"]}\n')
+                        if (repo == 'sean-who/ManifestAutoUpdate'):
+                            decryptedkey = await xor_decrypt(b"Scalping dogs, I'll fuck you",bytearray.fromhex(depot_info["DecryptionKey"]))
+                            await f.write(f'{depot_id};{decryptedkey.decode("utf-8")}\n')
+                        else:
+                            await f.write(f'{depot_id};{depot_info["DecryptionKey"]}\n')
     except KeyboardInterrupt:
         log.info("程序已退出")
     except Exception as e:
@@ -673,6 +677,7 @@ if __name__ == '__main__':
             'steambox.gdata.fun',
             'cysaw.top',
 #            'P-ToyStore/SteamManifestCache_Pro'
+            'sean-who/ManifestAutoUpdate',
             'luckygametools/steam-cfg',
             'Steam tools .lua/.st script (Local file)'
         ]
