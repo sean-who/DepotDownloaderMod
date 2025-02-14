@@ -546,6 +546,9 @@ async def cysaw_download(app_id: str) -> bool:
         if e.response.status_code == 404:
             log.error("未找到清单")
             return False
+        if e.response.status_code == 403:
+            log.error("清单403")
+            return False
         else:
             log.error(f'处理失败: {stack_error(e)}')
             raise
@@ -565,8 +568,9 @@ async def main(app_id: str, repos: list) -> bool:
     headers = {'Authorization': f'Bearer {github_token}'} if github_token else None
     # selected_repo, latest_date = await get_latest_repo_info(repos, app_id, headers)
     for selected_repo in repos:
-        if (selected_repo):
-            log.info(f'选择清单仓库: {selected_repo}')
+        try:
+            if (selected_repo):
+                log.info(f'选择清单仓库: {selected_repo}')
             if selected_repo == 'Steam tools .lua/.st script (Local file)':
                 manifests = await get_data_local(app_id)
                 await depotdownloadermod_add(app_id, manifests)
@@ -641,6 +645,8 @@ async def main(app_id: str, repos: list) -> bool:
                         await client.aclose()
                         os.system('pause')
                         return True
+        except Exception as e:
+            log.error(f'处理失败: {stack_error(e)}')
         log.error(f'未找到清单: {app_id}')
     log.error(f'清单下载或生成失败: {app_id}')
     await client.aclose()
