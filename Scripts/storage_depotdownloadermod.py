@@ -25,7 +25,7 @@ init()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 lock = asyncio.Lock()
-client = httpx.AsyncClient(trust_env=True)
+client = httpx.AsyncClient(trust_env=True, verify=False)
 
 DEPOTDOWNLOADER = "DepotDownloadermod.exe"
 DEPOTDOWNLOADER_ARGS = "-max-servers 128 -max-downloads 256 -verify-all"
@@ -527,8 +527,11 @@ async def gdata_download(app_id: str) -> bool:
 async def cysaw_download(app_id: str) -> bool:
     url = f"https://cysaw.top/uploads/{app_id}.zip"
     depot_cache_path = Path(os.getcwd())
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
     try:
-        r = await client.get(url, timeout=60)
+        r = await client.get(url, headers=headers, timeout=60)
         r.raise_for_status()
         content = await r.aread()  # 异步读取全部内容
         
