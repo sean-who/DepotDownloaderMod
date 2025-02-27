@@ -250,7 +250,7 @@ async def get_manifest(app_id: str, sha: str, path: str, repo: str) -> list:
             log.info(f'Manifest downloaded successfully: {path}')
             async with aiofiles.open(save_path, 'wb') as f:
                 await f.write(content)
-        elif path == 'Key.vdf':
+        elif path == 'Key.vdf'or path == 'key.vdf':
             content = await get(sha, path, repo)
             log.info(f'Key downloaded successfully: {path}')
             depots_config = vdf.loads(content.decode('utf-8'))
@@ -683,6 +683,7 @@ if __name__ == '__main__':
             'ikun0014/ManifestHub',
             'Auiowu/ManifestAutoUpdate',
             'tymolu233/ManifestAutoUpdate',
+            'SteamAutoCracks/ManifestHub',
             'PrintedWaste',
             'steambox.gdata.fun',
             'cysaw.top',
