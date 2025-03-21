@@ -28,7 +28,7 @@ lock = asyncio.Lock()
 client = httpx.AsyncClient(trust_env=True, verify=False)
 
 DEPOTDOWNLOADER = "DepotDownloadermod.exe"
-DEPOTDOWNLOADER_ARGS = "-max-servers 128 -max-downloads 256 -verify-all"
+DEPOTDOWNLOADER_ARGS = "-max-downloads 256 -verify-all"
 
 DEFAULT_CONFIG = {
     "Github_Personal_Token": "",
