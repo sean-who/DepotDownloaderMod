@@ -166,7 +166,6 @@ namespace DepotDownloader
             ContentDownloader.Config.InstallDirectory = GetParameter<string>(args, "-dir");
 
             ContentDownloader.Config.VerifyAll = HasParameter(args, "-verify-all") || HasParameter(args, "-verify_all") || HasParameter(args, "-validate");
-            ContentDownloader.Config.MaxServers = GetParameter(args, "-max-servers", 20);
 
             if (HasParameter(args, "-use-lancache"))
             {
@@ -185,7 +184,6 @@ namespace DepotDownloader
             }
 
             ContentDownloader.Config.MaxDownloads = GetParameter(args, "-max-downloads", 8);
-            ContentDownloader.Config.MaxServers = Math.Max(ContentDownloader.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
             ContentDownloader.Config.LoginID = HasParameter(args, "-loginid") ? GetParameter<uint>(args, "-loginid") : null;
             ContentDownloader.Config.UseManifestFile = HasParameter(args, "-manifestfile");
             ContentDownloader.Config.ManifestFile = GetParameter<string>(args, "-manifestfile");
@@ -393,6 +391,21 @@ namespace DepotDownloader
                 }
             }
 
+            if (!string.IsNullOrEmpty(password))
+            {
+                const int MAX_PASSWORD_SIZE = 64;
+
+                if (password.Length > MAX_PASSWORD_SIZE)
+                {
+                    Console.Error.WriteLine($"Warning: Password is longer than {MAX_PASSWORD_SIZE} characters, which is not supported by Steam.");
+                }
+
+                if (!password.All(char.IsAscii))
+                {
+                    Console.Error.WriteLine("Warning: Password contains non-ASCII characters, which is not supported by Steam.");
+                }
+            }
+
             return ContentDownloader.InitializeSteam3(username, password);
         }
 
@@ -500,11 +513,12 @@ namespace DepotDownloader
             Console.WriteLine("  -validate                - include checksum verification of files already downloaded");
             Console.WriteLine("  -manifest-only           - downloads a human readable manifest for any depots that would be downloaded.");
             Console.WriteLine("  -cellid <#>              - the overridden CellID of the content server to download from.");
-            Console.WriteLine("  -max-servers <#>         - maximum number of content servers to use. (default: 20).");
             Console.WriteLine("  -max-downloads <#>       - maximum number of chunks to download concurrently. (default: 8).");
             Console.WriteLine("  -loginid <#>             - a unique 32-bit integer Steam LogonID in decimal, required if running multiple instances of DepotDownloader concurrently.");
             Console.WriteLine("  -use-lancache            - forces downloads over the local network via a Lancache instance.");
             Console.WriteLine();
+            Console.WriteLine("  -debug                   - enable verbose debug logging.");
+            Console.WriteLine("  -V or --version          - print version and runtime.");
             Console.WriteLine("  -depotkeys <file>        - a list of depot keys to use ('depotID;hexKey' per line).");
             Console.WriteLine("  -manifestfile <file>     - Use Specified Manifest file from Steam.");
             Console.WriteLine("  -apptoken <#>            - Use Specified App Access Token.");

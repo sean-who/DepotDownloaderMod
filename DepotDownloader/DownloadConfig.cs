@@ -1,4 +1,4 @@
-﻿// This file is subject to the terms and conditions defined
+// This file is subject to the terms and conditions defined
 // in file 'LICENSE', which is part of this source code package.
 
 using System.Collections.Generic;
@@ -23,7 +23,6 @@ namespace DepotDownloader
 
         public bool VerifyAll { get; set; }
 
-        public int MaxServers { get; set; }
         public int MaxDownloads { get; set; }
 
         public bool RememberPassword { get; set; }

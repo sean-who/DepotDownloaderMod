@@ -328,12 +328,6 @@ namespace DepotDownloader
 
         public static void ShutdownSteam3()
         {
-            if (cdnPool != null)
-            {
-                cdnPool.Shutdown();
-                cdnPool = null;
-            }
-
             if (steam3 == null)
                 return;
 
@@ -665,10 +659,9 @@ namespace DepotDownloader
         private static async Task DownloadSteam3Async(List<DepotDownloadInfo> depots)
         {
             Ansi.Progress(Ansi.ProgressState.Indeterminate);
+            await cdnPool.UpdateServerList();
 
             var cts = new CancellationTokenSource();
-            cdnPool.ExhaustedToken = cts;
-
             var downloadCounter = new GlobalDownloadCounter();
             var depotsToDownload = new List<DepotFilesData>(depots.Count);
             var allFileNamesAllDepots = new HashSet<string>();
@@ -741,6 +734,14 @@ namespace DepotDownloader
             {
                 lastManifestId = depot.ManifestId;
                 oldManifest = DepotManifest.LoadFromFile(Config.ManifestFile);
+                if (oldManifest.FilenamesEncrypted)
+                {
+                    if (!oldManifest.DecryptFilenames(depot.DepotKey))
+                    {
+                        Console.WriteLine("Failed to decrypt filenames in manifest file.");
+                        return null;
+                    }
+                }
             }
 
             if (lastManifestId == depot.ManifestId && oldManifest != null)
@@ -771,7 +772,7 @@ namespace DepotDownloader
 
                         try
                         {
-                            connection = cdnPool.GetConnection(cts.Token);
+                            connection = cdnPool.GetConnection();
 
                             string cdnToken = null;
                             if (steam3.CDNAuthTokens.TryGetValue((depot.DepotId, connection.Host), out var authTokenCallbackPromise))
@@ -933,18 +934,25 @@ namespace DepotDownloader
             var files = depotFilesData.filteredFiles.Where(f => !f.Flags.HasFlag(EDepotFileFlag.Directory)).ToArray();
             var networkChunkQueue = new ConcurrentQueue<(FileStreamData fileStreamData, DepotManifest.FileData fileData, DepotManifest.ChunkData chunk)>();
 
-            await Util.InvokeAsync(
-                files.Select(file => new Func<Task>(async () =>
-                    await Task.Run(() => DownloadSteam3AsyncDepotFile(cts, downloadCounter, depotFilesData, file, networkChunkQueue)))),
-                maxDegreeOfParallelism: Config.MaxDownloads
-            );
+            var parallelOptions = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Config.MaxDownloads,
+                CancellationToken = cts.Token
+            };
 
-            await Util.InvokeAsync(
-                networkChunkQueue.Select(q => new Func<Task>(async () =>
-                    await Task.Run(() => DownloadSteam3AsyncDepotFileChunk(cts, downloadCounter, depotFilesData,
-                        q.fileData, q.fileStreamData, q.chunk)))),
-                maxDegreeOfParallelism: Config.MaxDownloads
-            );
+            await Parallel.ForEachAsync(files, parallelOptions, async (file, cancellationToken) =>
+            {
+                await Task.Yield();
+                DownloadSteam3AsyncDepotFile(cts, downloadCounter, depotFilesData, file, networkChunkQueue);
+            });
+
+            await Parallel.ForEachAsync(networkChunkQueue, parallelOptions, async (q, cancellationToken) =>
+            {
+                await DownloadSteam3AsyncDepotFileChunk(
+                    cts, downloadCounter, depotFilesData,
+                    q.fileData, q.fileStreamData, q.chunk
+                );
+            });
 
             // Check for deleted files if updating the depot.
             if (depotFilesData.previousManifest != null)
@@ -1214,7 +1222,7 @@ namespace DepotDownloader
 
                     try
                     {
-                        connection = cdnPool.GetConnection(cts.Token);
+                        connection = cdnPool.GetConnection();
 
                         string cdnToken = null;
                         if (steam3.CDNAuthTokens.TryGetValue((depot.DepotId, connection.Host), out var authTokenCallbackPromise))
@@ -1240,6 +1248,7 @@ namespace DepotDownloader
                     catch (TaskCanceledException)
                     {
                         Console.WriteLine("Connection timeout downloading chunk {0}", chunkID);
+                        cdnPool.ReturnBrokenConnection(connection);
                     }
                     catch (SteamKitWebRequestException e)
                     {
